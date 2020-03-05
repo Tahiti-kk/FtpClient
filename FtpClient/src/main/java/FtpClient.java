@@ -1,4 +1,3 @@
-import ftp.FileFtp;
 import util.Constant;
 
 /**

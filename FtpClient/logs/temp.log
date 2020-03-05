@@ -1,18 +1,18 @@
-17:33:45.752 INFO  ftp.FileFtp 68 uploadFile - 文件名为: melody.wav,文件路径为: E:\aliyun\data\melody.wav
-17:33:45.759 ERROR ftp.FileFtp 104 uploadFile - 文件传输错误 java.lang.NullPointerException: null
-	at ftp.FileFtp.uploadFile(FileFtp.java:73) [classes/:?]
+17:33:45.752 INFO  ftpCommand.FileFtp 68 uploadFile - 文件名为: melody.wav,文件路径为: E:\aliyun\data\melody.wav
+17:33:45.759 ERROR ftpCommand.FileFtp 104 uploadFile - 文件传输错误 java.lang.NullPointerException: null
+	at ftpCommand.FileFtp.uploadFile(FileFtp.java:73) [classes/:?]
 	at FtpClient.main(FtpClient.java:14) [classes/:?]
 
-17:34:56.231 INFO  ftp.FileFtp 68 uploadFile - 文件名为: melody.wav,文件路径为: E:\aliyun\data\melody.wav
-17:34:56.235 ERROR ftp.FileFtp 104 uploadFile - 文件传输错误 java.lang.NullPointerException: null
-	at ftp.FileFtp.uploadFile(FileFtp.java:73) [classes/:?]
+17:34:56.231 INFO  ftpCommand.FileFtp 68 uploadFile - 文件名为: melody.wav,文件路径为: E:\aliyun\data\melody.wav
+17:34:56.235 ERROR ftpCommand.FileFtp 104 uploadFile - 文件传输错误 java.lang.NullPointerException: null
+	at ftpCommand.FileFtp.uploadFile(FileFtp.java:73) [classes/:?]
 	at FtpClient.main(FtpClient.java:14) [classes/:?]
 
-17:35:06.060 INFO  ftp.FileFtp 68 uploadFile - 文件名为: melody.wav,文件路径为: E:\aliyun\data\melody.wav
-17:35:06.228 INFO  ftp.FileFtp 101 uploadFile - 文件传输完成
-17:41:39.159 INFO  ftp.FileFtp 68 uploadFile - 文件名为: melody.wav,文件路径为: E:\aliyun\data\melody.wav
-17:41:39.272 INFO  ftp.FileFtp 101 uploadFile - 文件传输完成
-17:53:45.820 INFO  ftp.FileFtp 68 uploadFile - 文件名为: melody.wav,文件路径为: E:\aliyun\data\melody.wav
-17:53:46.085 INFO  ftp.FileFtp 101 uploadFile - 文件传输完成
-17:57:11.846 INFO  ftp.FileFtp 68 uploadFile - 文件名为: JavaWeb.pdf,文件路径为: E:\aliyun\data\JavaWeb.pdf
-17:57:15.922 INFO  ftp.FileFtp 101 uploadFile - 文件传输完成
+17:35:06.060 INFO  ftpCommand.FileFtp 68 uploadFile - 文件名为: melody.wav,文件路径为: E:\aliyun\data\melody.wav
+17:35:06.228 INFO  ftpCommand.FileFtp 101 uploadFile - 文件传输完成
+17:41:39.159 INFO  ftpCommand.FileFtp 68 uploadFile - 文件名为: melody.wav,文件路径为: E:\aliyun\data\melody.wav
+17:41:39.272 INFO  ftpCommand.FileFtp 101 uploadFile - 文件传输完成
+17:53:45.820 INFO  ftpCommand.FileFtp 68 uploadFile - 文件名为: melody.wav,文件路径为: E:\aliyun\data\melody.wav
+17:53:46.085 INFO  ftpCommand.FileFtp 101 uploadFile - 文件传输完成
+17:57:11.846 INFO  ftpCommand.FileFtp 68 uploadFile - 文件名为: JavaWeb.pdf,文件路径为: E:\aliyun\data\JavaWeb.pdf
+17:57:15.922 INFO  ftpCommand.FileFtp 101 uploadFile - 文件传输完成

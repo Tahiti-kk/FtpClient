@@ -1,2 +1,2 @@
-17:57:11.846 INFO  ftp.FileFtp 68 uploadFile - 文件名为: JavaWeb.pdf,文件路径为: E:\aliyun\data\JavaWeb.pdf
-17:57:15.922 INFO  ftp.FileFtp 101 uploadFile - 文件传输完成
+17:57:11.846 INFO  ftpCommand.FileFtp 68 uploadFile - 文件名为: JavaWeb.pdf,文件路径为: E:\aliyun\data\JavaWeb.pdf
+17:57:15.922 INFO  ftpCommand.FileFtp 101 uploadFile - 文件传输完成

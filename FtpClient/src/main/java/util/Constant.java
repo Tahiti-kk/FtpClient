@@ -16,7 +16,7 @@ public class Constant {
     /**
      * 服务器开放端口
      */
-    public static final int SOCKET_PORT = 10086;
+    public static final int SOCKET_PORT = 21;
 
     /**
      * 本地IP
@@ -26,5 +26,32 @@ public class Constant {
     /**
      * 服务器IP
      */
-    public static final String REMOTE_IP = "http://116.62.170.221";
+    public static final String REMOTE_IP = "116.62.170.221";
+
+    /**
+     * username
+     */
+    public static final String USERNAME = "ftp511";
+
+    /**
+     * password
+     */
+    public static final String PASSWORD = "admin123456";
+
+    /**
+     * 文件分隔符
+     */
+    public static final String FILE_SEPARATOR = "/";
+
+    /**
+     * cmd中空格换行建
+     */
+    public static final String NEW_LINE = "\r\n";
+
+    /**
+     * 传输文件时的缓冲区大小
+     */
+    public static final int BUFFER_SIZE = 8192;
+
+
 }
