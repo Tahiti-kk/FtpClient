@@ -1,6 +1,0 @@
-17:53:45.796 INFO  FtpServer 29 main - Created and started a new thread Thread-0 for a new connection.
-17:53:45.836 INFO  EchoProtocol 46 handleEchoClient - 开始接受文件: melody.wav
-17:53:45.838 INFO  EchoProtocol 47 handleEchoClient - 文件长度为: 1755574
-17:57:11.811 INFO  FtpServer 29 main - Created and started a new thread Thread-1 for a new connection.
-17:57:11.859 INFO  EchoProtocol 46 handleEchoClient - 开始接受文件: JavaWeb.pdf
-17:57:11.860 INFO  EchoProtocol 47 handleEchoClient - 文件长度为: 164365477
