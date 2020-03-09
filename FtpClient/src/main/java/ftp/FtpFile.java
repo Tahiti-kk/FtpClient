@@ -53,8 +53,8 @@ public class FtpFile {
         return line;
     }
 
-    public int getType() {
-        return type;
+    public boolean isDirectory(){
+        return type == 1;
     }
 
     public long getFileSize() {
