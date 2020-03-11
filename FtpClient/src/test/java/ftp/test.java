@@ -72,10 +72,10 @@ public class test {
     public void test3() throws Exception{
         ftpClient = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
         ftpClient.login();
-        File file = new File("/Users/byron/Desktop/testfile.txt");
+        File file = new File("/Users/byron/Desktop/bigfile.txt");
         ftpClient.upload(file);
-        File dir = new File("/Users/byron/Desktop/folder");
-        ftpClient.upload(dir);
+//        File dir = new File("/Users/byron/Desktop/folder");
+//        ftpClient.upload(dir);
         ftpClient.quit();
         ftpClient = null;
     }

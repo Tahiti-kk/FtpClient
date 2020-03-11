@@ -291,7 +291,7 @@ public class FtpClient {
 
 
     //上传文件
-    public synchronized void upload(File file) throws Exception{
+    public void upload(File file) throws Exception{
         if (file.isDirectory()) {
             uploadDir(file);
         }else {
@@ -301,7 +301,7 @@ public class FtpClient {
     }
 
     //上传一个文件
-    public synchronized boolean uploadFile(InputStream inputStream, String fileName) throws Exception {
+    public boolean uploadFile(InputStream inputStream, String fileName) throws Exception {
         dataConnect();
         BufferedInputStream input = new BufferedInputStream(inputStream);
         String response = sendCommand("STOR "+ fileName);
@@ -309,7 +309,7 @@ public class FtpClient {
             throw new Exception("not allowed to send the file" + fileName);
         }
         BufferedOutputStream output = new BufferedOutputStream(dataSocket.getOutputStream());
-        byte[] buffer = new byte[4096];
+        byte[] buffer = new byte[1024];
         int bytesRead = 0;
         while((bytesRead=input.read(buffer))!=-1){
             output.write(buffer,0,bytesRead);
@@ -323,7 +323,7 @@ public class FtpClient {
     }
 
     //上传文件夹
-    public synchronized void uploadDir(File file) throws Exception{
+    public void uploadDir(File file) throws Exception{
         makeDirectory(getCurrentDir()+"/"+file.getName());
         cwd(getCurrentDir()+"/"+file.getName());
         File[] fileList = file.listFiles();
@@ -339,7 +339,7 @@ public class FtpClient {
      * @return InputStream, but return null if the file is not found
      */
 
-    public synchronized boolean downloadFile(String fileName,String localPath) throws Exception {
+    public boolean downloadFile(String fileName,String localPath) throws Exception {
         dataConnect();
 
         String response = sendCommand("RETR "+fileName);
@@ -347,7 +347,7 @@ public class FtpClient {
             throw new Exception("file "+fileName+" download fail!");
         }
 
-        byte[] b = new byte[4096];
+        byte[] b = new byte[1024];
         int len = -1;
         // Here we may overwrite existing file.
         File file = new File(localPath + "/" + fileName);
@@ -371,7 +371,7 @@ public class FtpClient {
         return response.startsWith("226");
     }
 
-    public synchronized void downloadDir(FtpFile file,String localPath,String fileName) throws Exception{
+    public void downloadDir(FtpFile file,String localPath,String fileName) throws Exception{
         String dirPath = localPath+"/"+fileName;
         File dir = new File(dirPath);
         if(!dir.exists()){
@@ -386,7 +386,7 @@ public class FtpClient {
         }
     }
 
-    public synchronized void download(FtpFile file,String localDir) throws Exception {
+    public void download(FtpFile file,String localDir) throws Exception {
         if(file.isDirectory()){
             downloadDir(file,localDir,file.getFileName());
         }else{
