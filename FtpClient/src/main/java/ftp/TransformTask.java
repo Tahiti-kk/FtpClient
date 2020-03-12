@@ -23,6 +23,7 @@ public class TransformTask implements Runnable {
     private DataOutputStream os;
     private FtpFile ftpFile;
 
+
     public TransformTask(InputStream in, OutputStream out, FtpFile ftpFile) {
         this.is = new DataInputStream(in);
         this.os  = new DataOutputStream(out);

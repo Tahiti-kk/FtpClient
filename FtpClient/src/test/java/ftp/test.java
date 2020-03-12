@@ -100,4 +100,14 @@ public class test {
         ftpClient.quit();
         ftpClient = null;
     }
+
+    @Test
+    public void testFile(){
+        File file = new File("/Users/byron/Desktop/2017302580284软测hw2.docx");
+        System.out.println(file.length());
+        File folder = new File("/Users/byron/Desktop/testFolder");
+        UploadTask upt = new UploadTask(folder);
+        System.out.println(upt.getFileSize());
+    }
+
 }
