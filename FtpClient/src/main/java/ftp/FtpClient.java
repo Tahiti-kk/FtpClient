@@ -81,6 +81,10 @@ public class FtpClient {
     }
 
 
+    public Socket getDataSocket() {
+        return dataSocket;
+    }
+
     /**
      * 登录
      * @param username username
@@ -303,11 +307,11 @@ public class FtpClient {
     //上传一个文件
     public boolean uploadFile(InputStream inputStream, String fileName) throws Exception {
         dataConnect();
-        BufferedInputStream input = new BufferedInputStream(inputStream);
         String response = sendCommand("STOR "+ fileName);
         if(!response.startsWith("150")){
             throw new Exception("not allowed to send the file" + fileName);
         }
+        BufferedInputStream input = new BufferedInputStream(inputStream);
         BufferedOutputStream output = new BufferedOutputStream(dataSocket.getOutputStream());
         byte[] buffer = new byte[1024];
         int bytesRead = 0;
