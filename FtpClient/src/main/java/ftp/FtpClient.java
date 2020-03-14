@@ -163,7 +163,7 @@ public class FtpClient {
         if(!response.startsWith("250")){
             throw new Exception("No such file or factory");
         }
-        if (dir.equals("..") && !currentDir.equals('/')) {
+        if (dir.equals("..") && !getCurrentDir().equals('/')) {
             currentDir = currentDir.substring(0, currentDir.lastIndexOf('/'));
         } else if (!dir.equals("..")) {
             currentDir += "/" + dir;
@@ -188,8 +188,8 @@ public class FtpClient {
 
     //删除目录（空）TODO
     public boolean delDirectory(String dirName) throws Exception{
-        sendLine(("RMD " )+dirName);
-        return readLine().startsWith("250");
+        String response = sendCommand("RMD "+dirName);
+        return response.startsWith("250");
     }
 
     /**
@@ -206,17 +206,17 @@ public class FtpClient {
     public boolean delete(FtpFile file) throws Exception{
         //目录
         if(file.isDirectory()){
-            cwd(currentDir + "/" + file.getFileName());
+            cwd(getCurrentDir() + "/" + file.getFileName());
             ArrayList<FtpFile> fileList = getAllFiles();
             for (FtpFile ftpFile:fileList) {
-                deleteFile(getCurrentDir()+ftpFile.getFileName());
+                delete(ftpFile);
             }
             cwd("..");
-            delDirectory(file.getFileName());
+            delDirectory(getCurrentDir()+"/"+file.getFileName());
         }
         //文件
         else {
-            deleteFile(file.getFileName());
+            deleteFile(getCurrentDir()+"/"+file.getFileName());
         }
         return true;//TODO
     }
@@ -294,6 +294,7 @@ public class FtpClient {
     }
 
 
+
     //上传文件
     public void upload(File file) throws Exception{
         if (file.isDirectory()) {
@@ -332,7 +333,7 @@ public class FtpClient {
         cwd(getCurrentDir()+"/"+file.getName());
         File[] fileList = file.listFiles();
         for (File f:fileList){
-            uploadFile(new FileInputStream(f),f.getName());
+            upload(f);
         }
         cwd("..");
     }

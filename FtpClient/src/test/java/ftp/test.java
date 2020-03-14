@@ -72,10 +72,10 @@ public class test {
     public void test3() throws Exception{
         ftpClient = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
         ftpClient.login();
-        File file = new File("/Users/byron/Desktop/bigfile.txt");
-        ftpClient.upload(file);
-//        File dir = new File("/Users/byron/Desktop/folder");
-//        ftpClient.upload(dir);
+//        File file = new File("/Users/byron/Desktop/bigfile.txt");
+//        ftpClient.upload(file);
+        File dir = new File("/Users/byron/Desktop/testFolder3");
+        ftpClient.upload(dir);
         ftpClient.quit();
         ftpClient = null;
     }
@@ -96,18 +96,19 @@ public class test {
         ftpClient = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
         ftpClient.login();
         ArrayList<FtpFile> ftpFiles = ftpClient.getAllFiles();
-        ftpClient.delete(ftpFiles.get(0));
+        ftpClient.delete(ftpFiles.get(10));
         ftpClient.quit();
         ftpClient = null;
     }
 
     @Test
-    public void testFile(){
-        File file = new File("/Users/byron/Desktop/2017302580284软测hw2.docx");
-        System.out.println(file.length());
-        File folder = new File("/Users/byron/Desktop/testFolder");
-        UploadTask upt = new UploadTask(folder);
-        System.out.println(upt.getFileSize());
+    public void testFile() throws Exception {
+        ftpClient = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
+        ftpClient.login();
+        File file = new File("/Users/byron/Desktop/testFolder3");
+        UploadTask uploadTask=new UploadTask(ftpClient,file,0,null,0);
+        uploadTask.run();
     }
+
 
 }

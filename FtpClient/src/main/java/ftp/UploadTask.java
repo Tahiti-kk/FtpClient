@@ -112,6 +112,7 @@ public class UploadTask implements Runnable {
     //上传一个文件
     public boolean uploadFile(InputStream inputStream,File file) throws Exception {
         //dataConnect();
+        long curSize=0;
         try{
             String response = ftpClient.sendCommand("STOR "+ file.getName());
             if(!response.startsWith("150")){
@@ -127,7 +128,7 @@ public class UploadTask implements Runnable {
                 setBegin(false);
                 setExit(false);
             }
-            long curSize=0;
+
             while((bytesRead=input.read(buffer))!=-1&&!isExit()){//判断何时停止
                 output.write(buffer,0,bytesRead);
                 curSize+=bytesRead;
@@ -137,16 +138,16 @@ public class UploadTask implements Runnable {
             output.close();
             input.close();
 
-            //如果在这停止 保存当前文件路径 和已下载字节数
-            if(isExit()){
-                setCurUpSize(curSize);
-                setCurFilePath(file.getAbsolutePath());
-                //保存 filePath 和 curSize， 上面还要加filePath参数
-            }
-            return file.length()==curSize;
         }catch(Exception e){
             e.printStackTrace();
         }
+        //如果在这停止 保存当前文件路径 和已下载字节数
+        if(isExit()){
+            setCurUpSize(curSize);
+            setCurFilePath(file.getAbsolutePath());
+            //保存 filePath 和 curSize， 上面还要加filePath参数
+        }
+        return file.length()==curSize;
     }
 
     //上传文件夹
