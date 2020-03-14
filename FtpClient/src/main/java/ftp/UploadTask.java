@@ -38,11 +38,16 @@ public class UploadTask implements Runnable {
         }
     }
 
-    UploadTask(File file,FtpClient ftpClient){
+    UploadTask(FtpClient ftpClient,File file,long alreadyUpSize,String curFilePath,long curUpSize){
        fileSize = calcFileSize(file);
-       alreadyUpSize = 0;
+       this.alreadyUpSize = alreadyUpSize;
        uploadFile = file;
        this.ftpClient = ftpClient;
+       this.curFilePath = curFilePath;
+       this.curUpSize = curUpSize;
+       if(alreadyUpSize==0){
+           setExit(false);
+       }
     }
 
     public long getFileSize() {
