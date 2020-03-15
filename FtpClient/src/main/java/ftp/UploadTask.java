@@ -111,7 +111,7 @@ public class UploadTask implements Runnable {
 
     //上传一个文件
     public boolean uploadFile(InputStream inputStream,File file) throws Exception {
-        //dataConnect();
+        ftpClient.dataConnect();
         long curSize=0;
         try{
             String response = ftpClient.sendCommand("STOR "+ file.getName());
@@ -137,7 +137,8 @@ public class UploadTask implements Runnable {
             output.flush();
             output.close();
             input.close();
-
+            ftpClient.getDataSocket().close();
+            ftpClient.readLine();
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -171,9 +172,7 @@ public class UploadTask implements Runnable {
     @Override
     public void run(){
         try{
-            ftpClient.dataConnect();
             upload(uploadFile);
-            ftpClient.getDataSocket().close();
             if(getAlreadyUpSize()!=getFileSize()){
                 //TODO 保存列表
             }

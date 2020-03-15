@@ -72,9 +72,7 @@ public class test {
     public void test3() throws Exception{
         ftpClient = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
         ftpClient.login();
-//        File file = new File("/Users/byron/Desktop/bigfile.txt");
-//        ftpClient.upload(file);
-        File dir = new File("/Users/byron/Desktop/testFolder3");
+        File dir = new File("C:\\Users\\lenovo\\Desktop\\winftp");
         ftpClient.upload(dir);
         ftpClient.quit();
         ftpClient = null;
@@ -96,7 +94,7 @@ public class test {
         ftpClient = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
         ftpClient.login();
         ArrayList<FtpFile> ftpFiles = ftpClient.getAllFiles();
-        ftpClient.delete(ftpFiles.get(10));
+        ftpClient.delete(ftpFiles.get(12));
         ftpClient.quit();
         ftpClient = null;
     }
@@ -105,9 +103,21 @@ public class test {
     public void testFile() throws Exception {
         ftpClient = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
         ftpClient.login();
-        File file = new File("/Users/byron/Desktop/testFolder3");
+        File file = new File("C:\\Users\\lenovo\\Desktop\\winftp");
         UploadTask uploadTask=new UploadTask(ftpClient,file,0,null,0);
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(){
+                    System.out.println("进度："+uploadTask.getAlreadyUpSize());
+                }
+            }
+        });
+        t.start();
         uploadTask.run();
+
+
+
     }
 
 
