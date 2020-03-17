@@ -2,6 +2,7 @@ package ftp;
 
 import util.Constant;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 /**
@@ -68,4 +69,5 @@ public class FtpFile {
     public String getFilePath() {
         return filePath;
     }
+
 }

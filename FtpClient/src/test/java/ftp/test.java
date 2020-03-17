@@ -72,8 +72,8 @@ public class test {
     public void test3() throws Exception{
         ftpClient = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
         ftpClient.login();
-        File dir = new File("C:\\Users\\lenovo\\Desktop\\winftp");
-        ftpClient.upload(dir);
+        //File dir = new File("C:\\Users\\lenovo\\Desktop\\winftp");
+        //ftpClient.upload(dir);
         ftpClient.quit();
         ftpClient = null;
     }
@@ -83,8 +83,8 @@ public class test {
         ftpClient = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
         ftpClient.login();
         ArrayList<FtpFile> ftpFiles = ftpClient.getAllFiles();
-        ftpClient.download(ftpFiles.get(0),"/Users/byron/Desktop");
-        ftpClient.download(ftpFiles.get(8),"/Users/byron/Desktop");
+//        ftpClient.download(ftpFiles.get(0),"/Users/byron/Desktop");
+//        ftpClient.download(ftpFiles.get(8),"/Users/byron/Desktop");
         ftpClient.quit();
         ftpClient = null;
     }
@@ -108,7 +108,7 @@ public class test {
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-                while(){
+                while(true){
                     System.out.println("进度："+uploadTask.getAlreadyUpSize());
                 }
             }

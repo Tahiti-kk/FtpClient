@@ -54,10 +54,6 @@ public class UploadTask implements Runnable {
         return fileSize;
     }
 
-    public void setFileSize(long fileSize) {
-        this.fileSize = fileSize;
-    }
-
     public long getAlreadyUpSize() {
         return alreadyUpSize;
     }
@@ -123,7 +119,7 @@ public class UploadTask implements Runnable {
             byte[] buffer = new byte[1024];
             int bytesRead = 0;
             //若为开始位置，则跳过之前的进度，设置begin为假，exit为假
-            if(begin){
+            if(isBegin()){
                 input.skip(getCurUpSize());
                 setBegin(false);
                 setExit(false);
@@ -137,11 +133,12 @@ public class UploadTask implements Runnable {
             output.flush();
             output.close();
             input.close();
-            ftpClient.getDataSocket().close();
-            ftpClient.readLine();
+
         }catch(Exception e){
             e.printStackTrace();
         }
+        ftpClient.getDataSocket().close();
+        ftpClient.readLine();
         //如果在这停止 保存当前文件路径 和已下载字节数
         if(isExit()){
             setCurUpSize(curSize);
@@ -161,7 +158,7 @@ public class UploadTask implements Runnable {
             if(f.getAbsolutePath()==curFilePath){
                 setBegin(true);
             }
-            if(begin||!exit){
+            if(isBegin()||!isExit()){
                 upload(f);
             }
         }

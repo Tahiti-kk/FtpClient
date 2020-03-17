@@ -295,109 +295,110 @@ public class FtpClient {
 
 
 
-    //上传文件
-    public void upload(File file) throws Exception{
-        if (file.isDirectory()) {
-            uploadDir(file);
-        }else {
-            uploadFile(new FileInputStream(file), file.getName());
-        }
+//    //上传文件
+//    public void upload(File file) throws Exception{
+//        if (file.isDirectory()) {
+//            uploadDir(file);
+//        }else {
+//            uploadFile(new FileInputStream(file), file.getName());
+//        }
+//
+//    }
+//
+//    //上传一个文件
+//    public boolean uploadFile(InputStream inputStream, String fileName) throws Exception {
+//        dataConnect();
+//        String response = sendCommand("STOR "+ fileName);
+//        if(!response.startsWith("150")){
+//            throw new Exception("not allowed to send the file" + fileName);
+//        }
+//        BufferedInputStream input = new BufferedInputStream(inputStream);
+//        BufferedOutputStream output = new BufferedOutputStream(dataSocket.getOutputStream());
+//        byte[] buffer = new byte[1024];
+//        int bytesRead = 0;
+//        while((bytesRead=input.read(buffer))!=-1){
+//            output.write(buffer,0,bytesRead);
+//        }
+//        output.flush();
+//        output.close();
+//        input.close();
+//        dataSocket.close();
+//        response = readLine();
+//        return response.startsWith("226");
+//    }
+//
+//    //上传文件夹
+//    public void uploadDir(File file) throws Exception{
+//        makeDirectory(getCurrentDir()+"/"+file.getName());
+//        cwd(getCurrentDir()+"/"+file.getName());
+//        File[] fileList = file.listFiles();
+//        for (File f:fileList){
+//            upload(f);
+//        }
+//        cwd("..");
+//    }
 
-    }
+//    /**
+//     * 从服务器上下载文件
+//     * @param file the file
+//     * @return InputStream, but return null if the file is not found
+//     */
+//
+//    public boolean downloadFile(String fileName,String localPath) throws Exception {
+//        dataConnect();
+//
+//        String response = sendCommand("RETR "+fileName);
+//        if(!response.startsWith("150")){
+//            throw new Exception("file "+fileName+" download fail!");
+//        }
+//
+//        byte[] b = new byte[1024];
+//        int len = -1;
+//        // Here we may overwrite existing file.
+//        File file = new File(localPath + "/" + fileName);
+//        if (!file.exists()) {// This file does not exist
+//            if (!file.createNewFile()) {// And create it unsuccessfully
+//                // means this file can't be downloaded here
+//                return false;
+//            }
+//        }
+//        FileOutputStream fos = new FileOutputStream(file);
+//        BufferedOutputStream out = new BufferedOutputStream(fos);
+//        BufferedInputStream input = new BufferedInputStream(dataSocket.getInputStream());
+//        while (-1 != (len = input.read(b, 0, b.length))) {
+//            out.write(b, 0, len);
+//        }
+//        out.flush();
+//        out.close();
+//        input.close();
+//        dataSocket.close();
+//        response = readLine();
+//        return response.startsWith("226");
+//    }
+//
+//    public void downloadDir(FtpFile file,String localPath,String fileName) throws Exception{
+//        String dirPath = localPath+"/"+fileName;
+//        File dir = new File(dirPath);
+//        if(!dir.exists()){
+//            if(!dir.mkdir()){
+//                return;
+//            }
+//        }
+//        cwd(getCurrentDir()+"/"+file.getFileName());
+//        ArrayList<FtpFile> fileList = getAllFiles();
+//        for (FtpFile f:fileList){
+//            downloadFile(f.getFileName(),dirPath);
+//        }
+//    }
+//
+//    public void download(FtpFile file,String localDir) throws Exception {
+//        if(file.isDirectory()){
+//            downloadDir(file,localDir,file.getFileName());
+//        }else{
+//            downloadFile(file.getFileName(),localDir);
+//        }
+//    }
 
-    //上传一个文件
-    public boolean uploadFile(InputStream inputStream, String fileName) throws Exception {
-        dataConnect();
-        String response = sendCommand("STOR "+ fileName);
-        if(!response.startsWith("150")){
-            throw new Exception("not allowed to send the file" + fileName);
-        }
-        BufferedInputStream input = new BufferedInputStream(inputStream);
-        BufferedOutputStream output = new BufferedOutputStream(dataSocket.getOutputStream());
-        byte[] buffer = new byte[1024];
-        int bytesRead = 0;
-        while((bytesRead=input.read(buffer))!=-1){
-            output.write(buffer,0,bytesRead);
-        }
-        output.flush();
-        output.close();
-        input.close();
-        dataSocket.close();
-        response = readLine();
-        return response.startsWith("226");
-    }
-
-    //上传文件夹
-    public void uploadDir(File file) throws Exception{
-        makeDirectory(getCurrentDir()+"/"+file.getName());
-        cwd(getCurrentDir()+"/"+file.getName());
-        File[] fileList = file.listFiles();
-        for (File f:fileList){
-            upload(f);
-        }
-        cwd("..");
-    }
-
-    /**
-     * 从服务器上下载文件
-     * @param file the file
-     * @return InputStream, but return null if the file is not found
-     */
-
-    public boolean downloadFile(String fileName,String localPath) throws Exception {
-        dataConnect();
-
-        String response = sendCommand("RETR "+fileName);
-        if(!response.startsWith("150")){
-            throw new Exception("file "+fileName+" download fail!");
-        }
-
-        byte[] b = new byte[1024];
-        int len = -1;
-        // Here we may overwrite existing file.
-        File file = new File(localPath + "/" + fileName);
-        if (!file.exists()) {// This file does not exist
-            if (!file.createNewFile()) {// And create it unsuccessfully
-                // means this file can't be downloaded here
-                return false;
-            }
-        }
-        FileOutputStream fos = new FileOutputStream(file);
-        BufferedOutputStream out = new BufferedOutputStream(fos);
-        BufferedInputStream input = new BufferedInputStream(dataSocket.getInputStream());
-        while (-1 != (len = input.read(b, 0, b.length))) {
-            out.write(b, 0, len);
-        }
-        out.flush();
-        out.close();
-        input.close();
-        dataSocket.close();
-        response = readLine();
-        return response.startsWith("226");
-    }
-
-    public void downloadDir(FtpFile file,String localPath,String fileName) throws Exception{
-        String dirPath = localPath+"/"+fileName;
-        File dir = new File(dirPath);
-        if(!dir.exists()){
-            if(!dir.mkdir()){
-                return;
-            }
-        }
-        cwd(getCurrentDir()+"/"+file.getFileName());
-        ArrayList<FtpFile> fileList = getAllFiles();
-        for (FtpFile f:fileList){
-            downloadFile(f.getFileName(),dirPath);
-        }
-    }
-
-    public void download(FtpFile file,String localDir) throws Exception {
-        if(file.isDirectory()){
-            downloadDir(file,localDir,file.getFileName());
-        }else{
-            downloadFile(file.getFileName(),localDir);
-        }
-    }
 //    //TODO
 //    public InputStream downloadFile(FtpFile file){
 //        InputStream in = null;
