@@ -94,13 +94,13 @@ public class test {
         ftpClient = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
         ftpClient.login();
         ArrayList<FtpFile> ftpFiles = ftpClient.getAllFiles();
-        ftpClient.delete(ftpFiles.get(12));
+        ftpClient.delete(ftpFiles.get(0));
         ftpClient.quit();
         ftpClient = null;
     }
 
     @Test
-    public void testFile() throws Exception {
+    public void testUploadDir() throws Exception {
         ftpClient = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
         ftpClient.login();
         File file = new File("C:\\Users\\lenovo\\Desktop\\winftp");
@@ -115,9 +115,25 @@ public class test {
         });
         t.start();
         uploadTask.run();
+    }
 
+    @Test
+    public void testUploadFile() throws Exception {
+        ftpClient = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
+        ftpClient.login();
+        File file = new File("C:\\Users\\lenovo\\Desktop\\511.txt");
+        UploadTask uploadTask=new UploadTask(ftpClient,file,0,null,0);
+        uploadTask.run();
+    }
 
-
+    @Test
+    public void testDownFile() throws Exception{
+        ftpClient = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
+        ftpClient.login();
+        ArrayList<FtpFile> ftpFiles = ftpClient.getAllFiles();
+        //调整get的值下不同东西
+        DownloadTask downloadTask = new DownloadTask(ftpFiles.get(1),ftpClient,0,null,0,"C:\\Users\\lenovo\\Desktop\\FtpDownload");
+        downloadTask.run();
     }
 
 

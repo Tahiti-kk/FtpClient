@@ -81,11 +81,13 @@ public class DownloadTask implements Runnable {
     //计算文件大小，单位为byte
     public long calcFtpFileSize(FtpFile file) throws Exception {
         if(file.isDirectory()){
+            ftpClient.cwd(ftpClient.getCurrentDir()+"/"+file.getFileName());
             long fileSize=0;
             ArrayList<FtpFile> fileList = ftpClient.getAllFiles();
             for(FtpFile f:fileList){
                 fileSize+=calcFtpFileSize(f);
             }
+            ftpClient.cwd("..");
             return fileSize;
         }else{
             return file.getFileSize();
@@ -102,7 +104,7 @@ public class DownloadTask implements Runnable {
                 throw new Exception("file "+fileName+" download fail!");
             }
             //新建文件 TODO看后面考不考虑文件替换
-            File file = new File(localPath + "/" + fileName);
+            File file = new File(localPath + "\\" + fileName);
             if (!file.exists()) {
                 if (!file.createNewFile()) {
                     return;
@@ -138,17 +140,19 @@ public class DownloadTask implements Runnable {
         //如果在这停止 保存当前文件路径 和已下载字节数
         if(isExit()){
             setCurDownSize(curSize);
-            setCurFilePath(ftpClient.getCurrentDir()+"/"+fileName);
+            setCurFilePath(ftpClient.getCurrentDir()+"\\"+fileName);
             //保存 filePath 和 curSize， 上面还要加filePath参数
         }
     }
 
     //下载文件夹
     public void downloadDir(FtpFile file,String localPath) throws Exception{
-        String dirPath = localPath+"/"+file.getFileName();
+        String dirPath = localPath+"\\"+file.getFileName();
+        System.out.println(dirPath);
         File dir = new File(dirPath);
         //新建文件夹
         if(!dir.exists()){
+            System.out.println("new dir");
             if(!dir.mkdir()){
                 return;
             }
@@ -157,7 +161,7 @@ public class DownloadTask implements Runnable {
         ArrayList<FtpFile> fileList = ftpClient.getAllFiles();
         for (FtpFile f:fileList){
             //找起始点
-            if(ftpClient.getCurrentDir()+"/"+f.getFileName()==curFilePath){
+            if(ftpClient.getCurrentDir()+"\\"+f.getFileName()==curFilePath){
                 setBegin(true);
             }
             if(isBegin()||!isExit()){
@@ -171,7 +175,7 @@ public class DownloadTask implements Runnable {
         if(file.isDirectory()){
             downloadDir(file,localDir);
         }else{
-            if(ftpClient.getCurrentDir()+"/"+file.getFileName()==curFilePath){
+            if(ftpClient.getCurrentDir()+"\\"+file.getFileName()==curFilePath){
                 setBegin(true);
             }
             if(!isExit()||begin) {
@@ -183,6 +187,10 @@ public class DownloadTask implements Runnable {
     @Override
     public void run() {
         try{
+            File dir = new File(localDir);
+            if(!dir.exists()){
+                dir.mkdir();
+            }
             download(ftpFile,localDir);
             if(getAlreadyDownSize()!=getFileSize()){
                 //TODO 保存列表
