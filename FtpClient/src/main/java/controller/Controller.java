@@ -1,6 +1,8 @@
 package controller;
+import ftp.DownloadTask;
 import ftp.FtpClient;
 import ftp.FtpFile;
+import ftp.UploadTask;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -165,7 +167,9 @@ public class Controller implements Initializable {
             try {
                 for (String s : fileList.getSelectionModel().getSelectedItems()) {
                     if (ftpClient != null) {
-                        ftpClient.upload(new File(currentFilePath + s));
+                        File file = new File(currentFilePath + s);
+                        UploadTask uploadTask=new UploadTask(ftpClient,file,0,null,0);
+                        uploadTask.run();
                     }
                 }
                 refreshSeverList();
@@ -202,7 +206,8 @@ public class Controller implements Initializable {
                     for (String s : severList.getSelectionModel().getSelectedItems()) {
                         for(FtpFile f:ftpFiles){
                             if(s.equals(f.getFileName())){
-                                ftpClient.download(f,currentFilePath);
+                                DownloadTask downloadTask = new DownloadTask(f,ftpClient,0,null,0,currentFilePath);
+                                downloadTask.run();
                                 break;
                             }
                         }

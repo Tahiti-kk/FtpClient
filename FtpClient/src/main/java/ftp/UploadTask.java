@@ -38,7 +38,7 @@ public class UploadTask implements Runnable {
         }
     }
 
-    UploadTask(FtpClient ftpClient,File file,long alreadyUpSize,String curFilePath,long curUpSize){
+    public UploadTask(FtpClient ftpClient,File file,long alreadyUpSize,String curFilePath,long curUpSize){
        fileSize = calcFileSize(file);
        this.alreadyUpSize = alreadyUpSize;
        uploadFile = file;
