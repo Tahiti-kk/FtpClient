@@ -72,8 +72,8 @@ public class test {
     public void test3() throws Exception{
         ftpClient = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
         ftpClient.login();
-        File dir = new File("C:\\Users\\lenovo\\Desktop\\winftp");
-        ftpClient.upload(dir);
+        //File dir = new File("C:\\Users\\lenovo\\Desktop\\winftp");
+        //ftpClient.upload(dir);
         ftpClient.quit();
         ftpClient = null;
     }
@@ -83,8 +83,8 @@ public class test {
         ftpClient = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
         ftpClient.login();
         ArrayList<FtpFile> ftpFiles = ftpClient.getAllFiles();
-        ftpClient.download(ftpFiles.get(0),"/Users/byron/Desktop");
-        ftpClient.download(ftpFiles.get(8),"/Users/byron/Desktop");
+//        ftpClient.download(ftpFiles.get(0),"/Users/byron/Desktop");
+//        ftpClient.download(ftpFiles.get(8),"/Users/byron/Desktop");
         ftpClient.quit();
         ftpClient = null;
     }
@@ -94,13 +94,13 @@ public class test {
         ftpClient = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
         ftpClient.login();
         ArrayList<FtpFile> ftpFiles = ftpClient.getAllFiles();
-        ftpClient.delete(ftpFiles.get(12));
+        ftpClient.delete(ftpFiles.get(0));
         ftpClient.quit();
         ftpClient = null;
     }
 
     @Test
-    public void testFile() throws Exception {
+    public void testUploadDir() throws Exception {
         ftpClient = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
         ftpClient.login();
         File file = new File("C:\\Users\\lenovo\\Desktop\\winftp");
@@ -108,16 +108,32 @@ public class test {
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-                while(){
+                while(true){
                     System.out.println("进度："+uploadTask.getAlreadyUpSize());
                 }
             }
         });
         t.start();
         uploadTask.run();
+    }
 
+    @Test
+    public void testUploadFile() throws Exception {
+        ftpClient = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
+        ftpClient.login();
+        File file = new File("C:\\Users\\lenovo\\Desktop\\511.txt");
+        UploadTask uploadTask=new UploadTask(ftpClient,file,0,null,0);
+        uploadTask.run();
+    }
 
-
+    @Test
+    public void testDownFile() throws Exception{
+        ftpClient = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
+        ftpClient.login();
+        ArrayList<FtpFile> ftpFiles = ftpClient.getAllFiles();
+        //调整get的值下不同东西
+        DownloadTask downloadTask = new DownloadTask(ftpFiles.get(1),ftpClient,0,null,0,"C:\\Users\\lenovo\\Desktop\\FtpDownload");
+        downloadTask.run();
     }
 
 
