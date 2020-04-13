@@ -4,7 +4,6 @@ import util.Constant;
 
 import java.io.*;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,8 +86,6 @@ public class FtpClient {
 
     /**
      * 登录
-     * @param username username
-     * @param password password
      * @return success or not
      */
     public boolean login() throws Exception {
@@ -115,9 +112,12 @@ public class FtpClient {
         if(!response.startsWith("230")){
             throw new Exception("error exists after send pass");
         }
-        System.out.println("connect successfully!");
+        // System.out.println("connect successfully!");
+        loggerMsg("connect successfully!", "info");
         setConnected(true);
         return response.startsWith("230");
+
+
 
 //        try{
 //            if(!sendCommand("USER " + username).startsWith("331")) {
@@ -170,7 +170,7 @@ public class FtpClient {
         }
     }
 
-    //文件重命名
+    // 文件重命名
     public boolean rename(String srcFile,String destFile) throws Exception{
         String response = sendCommand("REFR "+srcFile);
         if(!response.startsWith("350")){
@@ -194,7 +194,6 @@ public class FtpClient {
 
     /**
      * Todo 删除文件
-     * @param file the file
      * @return success or not
      */
     public boolean deleteFile(String fileName) throws Exception {
@@ -202,7 +201,7 @@ public class FtpClient {
         return response.startsWith("250");
     }
 
-    //删除目录或文件
+    // 删除目录或文件
     public boolean delete(FtpFile file) throws Exception{
         //目录
         if(file.isDirectory()){
@@ -251,8 +250,10 @@ public class FtpClient {
         String[] split = message.split(",");
         String ip = split[0]+"."+split[1]+"."+split[2]+"."+split[3];
         int port = (Integer.parseInt(split[4])<<8)+Integer.parseInt(split[5]);
-        System.out.println(ip);
-        System.out.println(port);
+//        System.out.println(ip);
+//        System.out.println(port);
+        loggerMsg("ip:" + ip, "info");
+        loggerMsg("port:" + port, "info");
         dataSocket = new Socket(ip,port);
     }
 
@@ -340,7 +341,6 @@ public class FtpClient {
 
     /**
      * 从服务器上下载文件
-     * @param file the file
      * @return InputStream, but return null if the file is not found
      */
 
@@ -426,16 +426,16 @@ public class FtpClient {
 
     public String readLine() throws IOException {
         String line = reader.readLine();
-        System.out.println("<"+line);
-        loggerReceiveMsg(line);
+        // System.out.println("<"+line);
+        loggerMsg("<" + line, "cmd");
         return line;
     }
 
     public void sendLine(String line) throws IOException{
-        loggerSendMsg(line + "\r\n");
+        loggerMsg(">"+line + "\r\n", "cmd");
         writer.write(line + "\r\n");
         writer.flush();
-        System.out.println(">"+line);
+        // System.out.println(">"+line);
     }
 
     /**
@@ -498,19 +498,9 @@ public class FtpClient {
      * 接口打印接收的msg
      * @param msg 接收的msg
      */
-    private void loggerReceiveMsg(String msg) {
+    private void loggerMsg(String msg, String type) {
         for(LoggerListener listener : this.loggerListeners) {
-            listener.receiveMsg(msg);
-        }
-    }
-
-    /**
-     * 接口打印发送的msg
-     * @param msg 发送的msg
-     */
-    private void loggerSendMsg(String msg) {
-        for(LoggerListener listener : this.loggerListeners) {
-            listener.sendMsg(msg);
+            listener.logMsg(msg, type);
         }
     }
 
@@ -518,28 +508,11 @@ public class FtpClient {
      * 接口打印异常的msg
      * @param msg 异常的msg
      */
-    private void loggerExceptionMsg(String msg) {
+    private void loggerExceptionMsg(String msg, String type) {
         for(LoggerListener listener : this.loggerListeners) {
-            listener.exceptionMsg(msg);
+            listener.exceptionMsg(msg, type);
         }
     }
 
-    /**
-     * 通知接口已连接
-     */
-    private void loggerConnectedMsg() {
-        for(LoggerListener listener : this.loggerListeners) {
-            listener.connected();
-        }
-    }
-
-    /**
-     * 通知接口断开连接
-     */
-    private void loggerDisconnectedMsg() {
-        for(LoggerListener listener : this.loggerListeners) {
-            listener.disconnected();
-        }
-    }
 
 }
