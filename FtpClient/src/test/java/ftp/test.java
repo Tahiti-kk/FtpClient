@@ -2,7 +2,6 @@ package ftp;
 
 import controller.MainPage;
 import org.junit.Test;
-import util.Constant;
 
 import java.io.File;
 import java.net.Socket;

@@ -11,27 +11,12 @@ public interface LoggerListener {
      * 收到msg
      * @param msg message
      */
-    void receiveMsg(String msg);
-
-    /**
-     * 发送msg
-     * @param msg message
-     */
-    void sendMsg(String msg);
+    void logMsg(String msg, String type);
 
     /**
      * 异常msg
      * @param msg message
      */
-    void exceptionMsg(String msg);
+    void exceptionMsg(String msg, String type);
 
-    /**
-     * 打印已连接
-     */
-    void connected();
-
-    /**
-     * 打印未连接
-     */
-    void disconnected();
 }
