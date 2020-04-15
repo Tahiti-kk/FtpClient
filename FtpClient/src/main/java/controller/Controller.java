@@ -20,6 +20,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import util.CmdListener;
+import util.InfoListener;
 
 
 public class Controller implements Initializable {
@@ -160,6 +162,13 @@ public class Controller implements Initializable {
         } else {
             try {
                 ftpClient = new FtpClient(ip, Integer.parseInt(port), account, password);
+
+                // 添加日志信息接口
+                CmdListener cmdListener = new CmdListener(fx_cmdText);
+                InfoListener infoListener = new InfoListener(fx_infoText);
+                ftpClient.addListener(cmdListener);
+                ftpClient.addListener(infoListener);
+
                 ftpClient.login();
                 fx_severPath.setText(ftpClient.getCurrentDir());
                 ArrayList<FtpFile> ftpFiles = ftpClient.getAllFiles();

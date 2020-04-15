@@ -1,6 +1,9 @@
 package ftp;
 
 import java.io.*;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 
 /**
@@ -110,20 +113,48 @@ public class UploadTask implements Runnable {
         ftpClient.dataConnect();
         long curSize=0;
         try{
-            String response = ftpClient.sendCommand("STOR "+ file.getName());
-            if(!response.startsWith("150")){
-                throw new Exception("not allowed to send the file" + file.getName());
-            }
             BufferedInputStream input = new BufferedInputStream(inputStream);
             BufferedOutputStream output = new BufferedOutputStream(ftpClient.getDataSocket().getOutputStream());
             byte[] buffer = new byte[1024];
             int bytesRead = 0;
-            //若为开始位置，则跳过之前的进度，设置begin为假，exit为假
-            if(isBegin()){
+
+            // 如果为上传中中文件，则开始断点续传
+            if(isBegin()) {
+                String response = ftpClient.sendCommand("APPE "+file.getName());
+                if(!response.startsWith("150")){
+                    throw new Exception("file "+file.getName()+" continue upload fail!");
+                }
                 input.skip(getCurUpSize());
                 setBegin(false);
                 setExit(false);
+            } else {
+                String response = ftpClient.sendCommand("STOR "+ file.getName());
+                if(!response.startsWith("150")){
+                    throw new Exception("not allowed to send the file" + file.getName());
+                }
             }
+
+//            DecimalFormat df = (DecimalFormat) NumberFormat.getInstance();
+//            // 可以设置精确几位小数
+//            df.setMaximumFractionDigits(2);
+//            //模式 例如四舍五入
+//            df.setRoundingMode(RoundingMode.HALF_UP);
+
+            // 新建线程，每隔0.5秒更新进度条
+//            new Thread() {
+//                @Override
+//                public void run() {
+//                    // 程序未退出并且未上传完成
+//                    while(!isExit()&&(alreadyUpSize!=fileSize)) {
+//                        try {
+//                            Thread.sleep(500);
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
+//                        System.out.println("进度百分比：" + df.format(1.0*alreadyUpSize/fileSize*100) + "%");
+//                    }
+//                }
+//            }.start();
 
             while((bytesRead=input.read(buffer))!=-1&&!isExit()){//判断何时停止
                 output.write(buffer,0,bytesRead);
@@ -148,7 +179,7 @@ public class UploadTask implements Runnable {
         return file.length()==curSize;
     }
 
-    //上传文件夹
+    // 上传文件夹
     public void uploadDir(File file) throws Exception{
         ftpClient.makeDirectory(ftpClient.getCurrentDir()+"/"+file.getName());
         ftpClient.cwd(ftpClient.getCurrentDir()+"/"+file.getName());
@@ -178,6 +209,8 @@ public class UploadTask implements Runnable {
         }
     }
 
-
+    public void pauseUpload() {
+        setExit(true);
+    }
 
 }

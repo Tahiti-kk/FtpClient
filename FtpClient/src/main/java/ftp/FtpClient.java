@@ -111,7 +111,6 @@ public class FtpClient {
         if(!response.startsWith("230")){
             throw new Exception("error exists after send pass");
         }
-        // System.out.println("connect successfully!");
         loggerMsg("connect successfully!", "info");
         setConnected(true);
         return response.startsWith("230");
@@ -243,14 +242,13 @@ public class FtpClient {
     public void connectPASV() throws Exception{
         String response = sendCommand("PASV");
         if(!response.startsWith("227")){
+            loggerExceptionMsg("Exception: error exists after send pasv","info");
             throw new Exception("error exists after send pasv");
         }
         String message = response.substring(response.indexOf('(')+1,response.indexOf(')'));
         String[] split = message.split(",");
         String ip = split[0]+"."+split[1]+"."+split[2]+"."+split[3];
         int port = (Integer.parseInt(split[4])<<8)+Integer.parseInt(split[5]);
-//        System.out.println(ip);
-//        System.out.println(port);
         loggerMsg("ip:" + ip, "info");
         loggerMsg("port:" + port, "info");
         dataSocket = new Socket(ip,port);
@@ -266,6 +264,7 @@ public class FtpClient {
         dataConnect();
         // 如果未获得正确socket连接，则返回空列表
         if(dataSocket == null) {
+            loggerExceptionMsg("Exception: 数据连接错误","info");
             throw new Exception("数据连接错误");
             //TODO
         }
@@ -277,9 +276,9 @@ public class FtpClient {
 
             String line = bReader.readLine();
             while (line != null) {
+                loggerMsg(line, "cmd");
                 FtpFile file = parseFile(line, this.currentDir);
                 list.add(file);
-                System.out.println(file.toString());
                 line = bReader.readLine();
             }
 
@@ -294,109 +293,65 @@ public class FtpClient {
     }
 
 
-
-//    //上传文件
-//    public void upload(File file) throws Exception{
-//        if (file.isDirectory()) {
-//            uploadDir(file);
-//        }else {
-//            uploadFile(new FileInputStream(file), file.getName());
-//        }
-//
-//    }
-//
-//    //上传一个文件
-//    public boolean uploadFile(InputStream inputStream, String fileName) throws Exception {
+    /**
+     * 从服务器上下载文件
+     * @return InputStream, but return null if the file is not found
+     */
+//    public boolean downloadFile(String fileName,String localPath) throws Exception {
 //        dataConnect();
-//        String response = sendCommand("STOR "+ fileName);
+//
+//        String response = sendCommand("RETR "+fileName);
 //        if(!response.startsWith("150")){
-//            throw new Exception("not allowed to send the file" + fileName);
+//            loggerExceptionMsg("Exception: file "+fileName+" download fail!","info");
+//            throw new Exception("file "+fileName+" download fail!");
 //        }
-//        BufferedInputStream input = new BufferedInputStream(inputStream);
-//        BufferedOutputStream output = new BufferedOutputStream(dataSocket.getOutputStream());
-//        byte[] buffer = new byte[1024];
-//        int bytesRead = 0;
-//        while((bytesRead=input.read(buffer))!=-1){
-//            output.write(buffer,0,bytesRead);
+//
+//        byte[] b = new byte[1024];
+//        int len = -1;
+//        // Here we may overwrite existing file.
+//        File file = new File(localPath + "/" + fileName);
+//        if (!file.exists()) {// This file does not exist
+//            if (!file.createNewFile()) {// And create it unsuccessfully
+//                // means this file can't be downloaded here
+//                return false;
+//            }
 //        }
-//        output.flush();
-//        output.close();
+//        FileOutputStream fos = new FileOutputStream(file);
+//        BufferedOutputStream out = new BufferedOutputStream(fos);
+//        BufferedInputStream input = new BufferedInputStream(dataSocket.getInputStream());
+//        while (-1 != (len = input.read(b, 0, b.length))) {
+//            out.write(b, 0, len);
+//        }
+//        out.flush();
+//        out.close();
 //        input.close();
 //        dataSocket.close();
 //        response = readLine();
 //        return response.startsWith("226");
 //    }
-//
-//    //上传文件夹
-//    public void uploadDir(File file) throws Exception{
-//        makeDirectory(getCurrentDir()+"/"+file.getName());
-//        cwd(getCurrentDir()+"/"+file.getName());
-//        File[] fileList = file.listFiles();
-//        for (File f:fileList){
-//            upload(f);
+
+//    public void downloadDir(FtpFile file,String localPath,String fileName) throws Exception{
+//        String dirPath = localPath+"/"+fileName;
+//        File dir = new File(dirPath);
+//        if(!dir.exists()){
+//            if(!dir.mkdir()){
+//                return;
+//            }
 //        }
-//        cwd("..");
+//        cwd(getCurrentDir()+"/"+file.getFileName());
+//        ArrayList<FtpFile> fileList = getAllFiles();
+//        for (FtpFile f:fileList){
+//            downloadFile(f.getFileName(),dirPath);
+//        }
 //    }
 
-    /**
-     * 从服务器上下载文件
-     * @return InputStream, but return null if the file is not found
-     */
-
-    public boolean downloadFile(String fileName,String localPath) throws Exception {
-        dataConnect();
-
-        String response = sendCommand("RETR "+fileName);
-        if(!response.startsWith("150")){
-            throw new Exception("file "+fileName+" download fail!");
-        }
-
-        byte[] b = new byte[1024];
-        int len = -1;
-        // Here we may overwrite existing file.
-        File file = new File(localPath + "/" + fileName);
-        if (!file.exists()) {// This file does not exist
-            if (!file.createNewFile()) {// And create it unsuccessfully
-                // means this file can't be downloaded here
-                return false;
-            }
-        }
-        FileOutputStream fos = new FileOutputStream(file);
-        BufferedOutputStream out = new BufferedOutputStream(fos);
-        BufferedInputStream input = new BufferedInputStream(dataSocket.getInputStream());
-        while (-1 != (len = input.read(b, 0, b.length))) {
-            out.write(b, 0, len);
-        }
-        out.flush();
-        out.close();
-        input.close();
-        dataSocket.close();
-        response = readLine();
-        return response.startsWith("226");
-    }
-
-    public void downloadDir(FtpFile file,String localPath,String fileName) throws Exception{
-        String dirPath = localPath+"/"+fileName;
-        File dir = new File(dirPath);
-        if(!dir.exists()){
-            if(!dir.mkdir()){
-                return;
-            }
-        }
-        cwd(getCurrentDir()+"/"+file.getFileName());
-        ArrayList<FtpFile> fileList = getAllFiles();
-        for (FtpFile f:fileList){
-            downloadFile(f.getFileName(),dirPath);
-        }
-    }
-
-    public void download(FtpFile file,String localDir) throws Exception {
-        if(file.isDirectory()){
-            downloadDir(file,localDir,file.getFileName());
-        }else{
-            downloadFile(file.getFileName(),localDir);
-        }
-    }
+//    public void download(FtpFile file,String localDir) throws Exception {
+//        if(file.isDirectory()){
+//            downloadDir(file,localDir,file.getFileName());
+//        }else{
+//            downloadFile(file.getFileName(),localDir);
+//        }
+//    }
 
 //    //TODO
 //    public InputStream downloadFile(FtpFile file){
@@ -425,16 +380,14 @@ public class FtpClient {
 
     public String readLine() throws IOException {
         String line = reader.readLine();
-        // System.out.println("<"+line);
-        loggerMsg("<" + line, "cmd");
+        loggerMsg(line, "cmd");
         return line;
     }
 
     public void sendLine(String line) throws IOException{
-        loggerMsg(">"+line + "\r\n", "cmd");
+        loggerMsg("cmd> "+line, "cmd");
         writer.write(line + "\r\n");
         writer.flush();
-        // System.out.println(">"+line);
     }
 
     /**
@@ -446,34 +399,13 @@ public class FtpClient {
      */
     public String sendCommand(String cmd) throws Exception {
         if(!isConnected){
+            loggerExceptionMsg("Exception: not connect to the server!","info");
             throw new Exception("not connect to the server!");
         }
         // 向管道中输入指令
         sendLine(cmd);
         String response = readLine();
         return response;
-//        try{
-//            str = this.in.readLine();
-//
-//            // 检测未连接至socket或者未登录
-//            boolean isDisconnected = isConnected() && (str == null);
-//            boolean isLogin = isConnected() && (str != null) && str.startsWith("530");
-//            if(isDisconnected || isLogin) {
-//                this.connected = false;
-//                loggerDisconnectedMsg();
-//            }
-//            // 成功获得返回指令
-//            loggerReceiveMsg(str);
-//        } catch (IOException e) {
-//            loggerExceptionMsg(e.getMessage());
-//            // 如果显示是连接状态，则通知连接已断开
-//            if(isConnected()) {
-//                this.connected = false;
-//                loggerDisconnectedMsg();
-//            }
-//            throw e;
-//        }
-//        return str==null ? "" : str;
     }
 
     /**

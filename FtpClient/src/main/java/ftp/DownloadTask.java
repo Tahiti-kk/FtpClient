@@ -24,9 +24,13 @@ public class DownloadTask implements Runnable {
 
     private long fileSize;
 
+    // 整个文件夹的下载大小
     private long alreadyDownSize;
 
+    // 暂停时当前文件路径
     private String curFilePath;
+
+    // 暂停时当前文件下载大小
     private long curDownSize;
 
     public DownloadTask(FtpFile ftpFile, FtpClient ftpClient, long alreadyDownSize, String curFilePath, long curDownSize, String localDir) throws Exception {
@@ -99,6 +103,16 @@ public class DownloadTask implements Runnable {
         ftpClient.dataConnect();
         long curSize=0;
         try{
+            // 如果为下载中文件，则开始断点续传
+            if(isBegin()) {
+                String response = ftpClient.sendCommand("REST "+getCurDownSize());
+                if(!response.startsWith("150")){
+                    throw new Exception("file "+fileName+" continue download fail!");
+                }
+                setBegin(false);
+                setExit(false);
+            }
+
             String response = ftpClient.sendCommand("RETR "+fileName);
             if(!response.startsWith("150")){
                 throw new Exception("file "+fileName+" download fail!");
@@ -116,17 +130,12 @@ public class DownloadTask implements Runnable {
 
             byte[] b = new byte[1024];
             int bytesRead = 0;
-            //若为开始位置，则跳过之前的进度，设置begin为假，exit为假
-            if(isBegin()){
-                input.skip(getCurDownSize());
-                setBegin(false);
-                setExit(false);
-            }
 
             while ((bytesRead = input.read(b, 0, b.length))!=-1&&!isExit()) {
                 out.write(b, 0, bytesRead);
                 curSize+=bytesRead;
                 setAlreadyDownSize(alreadyDownSize+bytesRead);
+                System.out.println("进度百分比：" + alreadyDownSize/fileSize);
             }
             out.flush();
             out.close();
@@ -145,7 +154,7 @@ public class DownloadTask implements Runnable {
         }
     }
 
-    //下载文件夹
+    // 下载文件夹
     public void downloadDir(FtpFile file,String localPath) throws Exception{
         String dirPath = localPath+"\\"+file.getFileName();
         System.out.println(dirPath);
@@ -192,6 +201,7 @@ public class DownloadTask implements Runnable {
                 dir.mkdir();
             }
             download(ftpFile,localDir);
+            // 如果没有下载完，保存列表
             if(getAlreadyDownSize()!=getFileSize()){
                 //TODO 保存列表
             }
@@ -199,4 +209,10 @@ public class DownloadTask implements Runnable {
             e.printStackTrace();
         }
     }
+
+    public void pauseDownload() {
+        setExit(true);
+    }
+
+
 }
