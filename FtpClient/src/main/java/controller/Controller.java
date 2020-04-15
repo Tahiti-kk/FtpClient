@@ -8,18 +8,17 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
-import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 
@@ -46,6 +45,22 @@ public class Controller implements Initializable {
     private Label fx_localPath;
     @FXML
     private Label fx_severPath;
+
+//    @FXML
+//    private MenuButton fx_downloadMenu;
+//    @FXML
+//    private MenuButton fx_uploadMenu;
+
+    //cmd和info窗口
+    @FXML
+    private TextArea fx_cmdText;
+    @FXML
+    private TextArea fx_infoText;
+
+    @FXML
+    private HBox fx_fileHbox;
+    @FXML
+    private VBox fx_processVbox;
 
 
     private FtpClient ftpClient = null;
@@ -206,8 +221,21 @@ public class Controller implements Initializable {
                     for (String s : severList.getSelectionModel().getSelectedItems()) {
                         for(FtpFile f:ftpFiles){
                             if(s.equals(f.getFileName())){
-                                DownloadTask downloadTask = new DownloadTask(f,ftpClient,0,null,0,currentFilePath);
-                                downloadTask.run();
+                                Thread t_download = new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            DownloadTask downloadTask = new DownloadTask(f, ftpClient, 0, null, 0, currentFilePath);
+                                            downloadTask.run();
+                                            //fx_uploadMenu.
+                                            while(true){
+                                                System.out.println("进度："+downloadTask.getAlreadyDownSize());
+                                            }
+                                        }catch (Exception ex){
+                                            System.out.println(ex.getMessage());
+                                        }
+                                    }
+                                });
                                 break;
                             }
                         }
@@ -218,6 +246,34 @@ public class Controller implements Initializable {
                 }
             }
         }
+    }
+
+    //cmd窗口信息
+    public void Click_cmd(MouseEvent me){
+        fx_infoText.setVisible(false);
+        fx_cmdText.setVisible(true);
+        //对cmdText文本进行设置
+        fx_cmdText.setText("这是cmd窗口");
+    }
+
+    //info窗口信息
+    public void Click_info(MouseEvent me){
+        fx_cmdText.setVisible(false);
+        fx_infoText.setVisible(true);
+        //对infoText文本进行设置
+        fx_infoText.setText("这是info窗口");
+    }
+
+    //切换文件列表
+    public void Click_fileHbox(MouseEvent me){
+        fx_processVbox.setVisible(false);
+        fx_fileHbox.setVisible(true);
+    }
+
+    //切换进程显示
+    public void Click_processVbox(MouseEvent me){
+        fx_fileHbox.setVisible(false);
+        fx_processVbox.setVisible(true);
     }
 
     //刷新本地文件列表

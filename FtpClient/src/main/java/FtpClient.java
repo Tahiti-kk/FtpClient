@@ -17,7 +17,7 @@ public class FtpClient extends Application{
         URL resourse = getClass().getResource("sample.fxml");
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         primaryStage.setTitle("Hello World");
-        Scene scene = new Scene(root, 1200, 600);
+        Scene scene = new Scene(root, 1200, 800);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
