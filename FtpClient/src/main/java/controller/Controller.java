@@ -240,7 +240,9 @@ public class Controller implements Initializable {
                     for (String s : severList.getSelectionModel().getSelectedItems()) {
                         for(FtpFile f:ftpFiles){
                             if(s.equals(f.getFileName())) {
-                                DownloadTask downloadTask = new DownloadTask(f, ftpClient, 0, null, 0, currentFilePath);
+                                FtpClient ftpClient1 = new FtpClient("116.62.170.221",21,"ftp511","admin123456");
+                                ftpClient1.getCurrentDir();
+                                DownloadTask downloadTask = new DownloadTask(f, ftpClient1, 0, null, 0, currentFilePath);
                                 ProgressBar progressBar = new ProgressBar();
                                 fx_downloadVbox.getChildren().add(progressBar);
                                 Thread t_download = new Thread(downloadTask);
