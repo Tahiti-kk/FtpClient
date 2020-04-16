@@ -62,6 +62,14 @@ public class FtpClient {
         this.pass = pass;
     }
 
+    public FtpClient(FtpClient ftpClient){
+        this.host = ftpClient.host;
+        this.port = ftpClient.port;
+        this.user = ftpClient.user;
+        this.pass = ftpClient.pass;
+    }
+
+
     /**
      * 是否与Socket管道连接
      * @return whether or not
@@ -380,12 +388,14 @@ public class FtpClient {
 
     public String readLine() throws IOException {
         String line = reader.readLine();
+        System.out.println(line);
         loggerMsg(line, "cmd");
         return line;
     }
 
     public void sendLine(String line) throws IOException{
         loggerMsg("cmd> "+line, "cmd");
+        System.out.println(line);
         writer.write(line + "\r\n");
         writer.flush();
     }
