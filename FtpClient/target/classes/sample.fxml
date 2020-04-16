@@ -13,21 +13,21 @@
       <TextArea fx:id="fx_infoText" editable="false" layoutX="9.0" layoutY="579.0" prefHeight="158.0" prefWidth="1182.0" visible="false" AnchorPane.leftAnchor="9.0" AnchorPane.rightAnchor="9.0" AnchorPane.topAnchor="579.0" />
       <HBox layoutX="12.0" layoutY="33.0" prefHeight="39.0" prefWidth="928.0" AnchorPane.leftAnchor="12.0" AnchorPane.rightAnchor="12.0" AnchorPane.topAnchor="33.0">
          <children>
-            <TextField id="ip" fx:id="fxIP" prefHeight="36.0" prefWidth="200.0" text="IP" HBox.hgrow="ALWAYS">
+            <TextField id="ip" fx:id="fxIP" prefHeight="36.0" prefWidth="200.0" text="116.62.170.221" HBox.hgrow="ALWAYS">
                <HBox.margin>
                   <Insets right="10.0" />
                </HBox.margin></TextField>
-            <TextField id="port" fx:id="fxPort" prefHeight="36.0" prefWidth="200.0" text="Port" HBox.hgrow="ALWAYS">
+            <TextField id="port" fx:id="fxPort" prefHeight="36.0" prefWidth="200.0" text="21" HBox.hgrow="ALWAYS">
                <HBox.margin>
                   <Insets left="10.0" right="10.0" />
                </HBox.margin>
             </TextField>
-            <TextField id="account" fx:id="fxAccount" prefHeight="36.0" prefWidth="200.0" text="user" HBox.hgrow="ALWAYS">
+            <TextField id="account" fx:id="fxAccount" prefHeight="36.0" prefWidth="200.0" text="ftp511" HBox.hgrow="ALWAYS">
                <HBox.margin>
                   <Insets left="10.0" right="10.0" />
                </HBox.margin>
             </TextField>
-            <TextField id="password" fx:id="fxPassword" prefHeight="36.0" prefWidth="200.0" text="password" HBox.hgrow="ALWAYS">
+            <TextField id="password" fx:id="fxPassword" prefHeight="36.0" prefWidth="200.0" text="admin123456" HBox.hgrow="ALWAYS">
                <HBox.margin>
                   <Insets left="10.0" right="10.0" />
                </HBox.margin>
@@ -38,7 +38,7 @@
                </HBox.margin></Button>
          </children>
       </HBox>
-      <HBox fx:id="fx_fileHbox" layoutX="17.0" layoutY="119.0" prefHeight="337.0" prefWidth="1176.0" AnchorPane.leftAnchor="12.0" AnchorPane.rightAnchor="12.0" AnchorPane.topAnchor="200.0">
+      <HBox fx:id="fx_fileHbox" layoutX="17.0" layoutY="119.0" prefHeight="337.0" prefWidth="1176.0" visible="false" AnchorPane.leftAnchor="12.0" AnchorPane.rightAnchor="12.0" AnchorPane.topAnchor="200.0">
          <children>
             <VBox prefHeight="461.0" prefWidth="570.0" HBox.hgrow="ALWAYS">
                <children>
@@ -76,8 +76,21 @@
       </HBox>
       <Button layoutX="14.0" layoutY="131.0" mnemonicParsing="false" onMouseClicked="#Click_fileHbox" prefHeight="62.0" prefWidth="189.0" text="文件列表" />
       <Button layoutX="203.0" layoutY="131.0" mnemonicParsing="false" onMouseClicked="#Click_processVbox" prefHeight="62.0" prefWidth="189.0" text="进度显示" />
-      <VBox fx:id="fx_processVbox" layoutX="14.0" layoutY="193.0" prefHeight="346.0" prefWidth="1101.0" visible="false" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="85.0" AnchorPane.topAnchor="193.0" />
       <Button layoutX="12.0" layoutY="549.0" mnemonicParsing="false" onMouseClicked="#Click_cmd" text="cmd" AnchorPane.leftAnchor="12.0" AnchorPane.topAnchor="549.0" />
       <Button layoutX="64.0" layoutY="549.0" mnemonicParsing="false" onMouseClicked="#Click_info" text="info" AnchorPane.leftAnchor="64.0" AnchorPane.topAnchor="549.0" />
+      <Accordion fx:id="fx_progressAcc" layoutX="14.0" layoutY="193.0" prefHeight="337.0" prefWidth="1176.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="193.0">
+        <panes>
+          <TitledPane animated="false" text="下载">
+               <content>
+                  <VBox fx:id="fx_downloadVbox" prefHeight="200.0" prefWidth="100.0" />
+               </content>
+          </TitledPane>
+          <TitledPane animated="false" text="上传">
+               <content>
+                  <VBox fx:id="fx_uploadVbox" prefHeight="200.0" prefWidth="100.0" />
+               </content>
+          </TitledPane>
+        </panes>
+      </Accordion>
    </children>
 </AnchorPane>

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -60,7 +61,12 @@ public class Controller implements Initializable {
     @FXML
     private HBox fx_fileHbox;
     @FXML
-    private VBox fx_processVbox;
+    private Accordion fx_progressAcc;
+
+    @FXML
+    private VBox fx_downloadVbox;
+    @FXML
+    private VBox fx_uploadVbox;
 
 
     private FtpClient ftpClient = null;
@@ -221,22 +227,36 @@ public class Controller implements Initializable {
                     for (String s : severList.getSelectionModel().getSelectedItems()) {
                         for(FtpFile f:ftpFiles){
                             if(s.equals(f.getFileName())){
-                                Thread t_download = new Thread(new Runnable() {
+                                DownloadTask downloadTask = new DownloadTask(f, ftpClient, 0, null, 0, currentFilePath);
+                                ProgressBar progressBar = new ProgressBar();
+                                fx_downloadVbox.getChildren().add(progressBar);
+                                Thread t_download = new Thread(downloadTask);
+                                Thread t = new Thread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        try {
-                                            DownloadTask downloadTask = new DownloadTask(f, ftpClient, 0, null, 0, currentFilePath);
-                                            downloadTask.run();
-                                            //fx_uploadMenu.
-                                            while(true){
-                                                System.out.println("进度："+downloadTask.getAlreadyDownSize());
-                                            }
-                                        }catch (Exception ex){
-                                            System.out.println(ex.getMessage());
+                                        while(downloadTask.getAlreadyDownSize() < downloadTask.getFileSize()){
+                                            progressBar.setProgress( ((double)(downloadTask.getAlreadyDownSize())) / (downloadTask.getFileSize()) );
+                                            System.out.println("进度："+downloadTask.getAlreadyDownSize());
                                         }
                                     }
                                 });
-                                break;
+                                t.start();
+                                t_download.start();
+//                                Thread t_download = new Thread(downloadTask);
+//                                Thread t_process = new Thread(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        while(true){
+//                                            System.out.println("进度："+downloadTask.getAlreadyDownSize());
+//                                            progressBar.setProgress(downloadTask.getAlreadyDownSize() / downloadTask.getFileSize());
+//                                            if(downloadTask.getAlreadyDownSize() >= downloadTask.getFileSize())
+//                                                break;
+//                                        }
+//                                    }
+//                                });
+//                                t_download.start();
+//                                t_process.start();
+//                                break;
                             }
                         }
                     }
@@ -266,14 +286,14 @@ public class Controller implements Initializable {
 
     //切换文件列表
     public void Click_fileHbox(MouseEvent me){
-        fx_processVbox.setVisible(false);
+        fx_progressAcc.setVisible(false);
         fx_fileHbox.setVisible(true);
     }
 
     //切换进程显示
     public void Click_processVbox(MouseEvent me){
         fx_fileHbox.setVisible(false);
-        fx_processVbox.setVisible(true);
+        fx_progressAcc.setVisible(true);
     }
 
     //刷新本地文件列表
