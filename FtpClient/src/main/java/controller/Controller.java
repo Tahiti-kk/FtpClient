@@ -190,7 +190,20 @@ public class Controller implements Initializable {
                     if (ftpClient != null) {
                         File file = new File(currentFilePath + s);
                         UploadTask uploadTask=new UploadTask(ftpClient,file,0,null,0);
-                        uploadTask.run();
+                        ProgressBar progressBar = new ProgressBar();
+                        fx_uploadVbox.getChildren().add(progressBar);
+                        Thread t_upload = new Thread(uploadTask);
+                        Thread t = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                while (uploadTask.getAlreadyUpSize() < uploadTask.getFileSize()) {
+                                    progressBar.setProgress(((double) (uploadTask.getAlreadyUpSize())) / (uploadTask.getFileSize()));
+                                    System.out.println("进度：" + uploadTask.getAlreadyUpSize());
+                                }
+                            }
+                        });
+                        t.start();
+                        t_upload.start();
                     }
                 }
                 refreshSeverList();
@@ -226,7 +239,7 @@ public class Controller implements Initializable {
                     ArrayList<FtpFile> ftpFiles = ftpClient.getAllFiles();
                     for (String s : severList.getSelectionModel().getSelectedItems()) {
                         for(FtpFile f:ftpFiles){
-                            if(s.equals(f.getFileName())){
+                            if(s.equals(f.getFileName())) {
                                 DownloadTask downloadTask = new DownloadTask(f, ftpClient, 0, null, 0, currentFilePath);
                                 ProgressBar progressBar = new ProgressBar();
                                 fx_downloadVbox.getChildren().add(progressBar);
@@ -234,29 +247,14 @@ public class Controller implements Initializable {
                                 Thread t = new Thread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        while(downloadTask.getAlreadyDownSize() < downloadTask.getFileSize()){
-                                            progressBar.setProgress( ((double)(downloadTask.getAlreadyDownSize())) / (downloadTask.getFileSize()) );
-                                            System.out.println("进度："+downloadTask.getAlreadyDownSize());
+                                        while (downloadTask.getAlreadyDownSize() < downloadTask.getFileSize()) {
+                                            progressBar.setProgress(((double) (downloadTask.getAlreadyDownSize())) / (downloadTask.getFileSize()));
+                                            System.out.println("进度：" + downloadTask.getAlreadyDownSize());
                                         }
                                     }
                                 });
                                 t.start();
                                 t_download.start();
-//                                Thread t_download = new Thread(downloadTask);
-//                                Thread t_process = new Thread(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        while(true){
-//                                            System.out.println("进度："+downloadTask.getAlreadyDownSize());
-//                                            progressBar.setProgress(downloadTask.getAlreadyDownSize() / downloadTask.getFileSize());
-//                                            if(downloadTask.getAlreadyDownSize() >= downloadTask.getFileSize())
-//                                                break;
-//                                        }
-//                                    }
-//                                });
-//                                t_download.start();
-//                                t_process.start();
-//                                break;
                             }
                         }
                     }
