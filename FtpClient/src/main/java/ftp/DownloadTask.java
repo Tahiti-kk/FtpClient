@@ -35,7 +35,8 @@ public class DownloadTask implements Runnable {
 
     public DownloadTask(FtpFile ftpFile, FtpClient ftpClient, long alreadyDownSize, String curFilePath, long curDownSize, String localDir) throws Exception {
         this.ftpFile = ftpFile;
-        this.ftpClient = ftpClient;
+        this.ftpClient = new FtpClient(ftpClient);
+        this.ftpClient.login();
         this.fileSize = calcFtpFileSize(ftpFile);
         this.alreadyDownSize = alreadyDownSize;
         this.curFilePath = curFilePath;
@@ -135,7 +136,7 @@ public class DownloadTask implements Runnable {
                 out.write(b, 0, bytesRead);
                 curSize+=bytesRead;
                 setAlreadyDownSize(alreadyDownSize+bytesRead);
-                System.out.println("进度百分比：" + alreadyDownSize/fileSize);
+                System.out.println(Thread.currentThread().getName()+" 进度百分比：" + (double)alreadyDownSize/(double)fileSize);
             }
             out.flush();
             out.close();
