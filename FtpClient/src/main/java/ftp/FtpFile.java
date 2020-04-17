@@ -2,6 +2,7 @@ package ftp;
 
 import util.Constant;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Vector;
 
@@ -9,7 +10,7 @@ import java.util.Vector;
  * @author JerryLee
  * @date 2020/3/4
  */
-public class FtpFile {
+public class FtpFile implements Serializable {
 
     private String line;
 

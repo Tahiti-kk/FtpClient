@@ -123,6 +123,8 @@ public class test {
         File file = new File("C:\\Users\\lenovo\\Desktop\\511.txt");
         UploadTask uploadTask=new UploadTask(ftpClient,file,0,null,0);
         uploadTask.run();
+        ftpClient.quit();
+        ftpClient = null;
     }
 
     @Test
@@ -133,7 +135,12 @@ public class test {
         //调整get的值下不同东西
         DownloadTask downloadTask = new DownloadTask(ftpFiles.get(1),ftpClient,0,null,0,"C:\\Users\\lenovo\\Desktop\\FtpDownload");
         downloadTask.run();
+        ftpClient.quit();
+        ftpClient = null;
     }
+
+
+
 
 
 }

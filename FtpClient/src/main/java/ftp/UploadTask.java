@@ -12,7 +12,7 @@ import java.text.NumberFormat;
  * @description: TODO
  */
 //TODO 判断上传的文件是不是同一个
-public class UploadTask implements Runnable {
+public class UploadTask implements Runnable,Serializable {
 
     private File uploadFile;
 
@@ -25,7 +25,8 @@ public class UploadTask implements Runnable {
     private String curFilePath;
     private long curUpSize;
 
-    private FtpClient ftpClient;
+    //不序列化ftpClient
+    private transient FtpClient ftpClient;
 
     //计算文件大小，单位为byte
     public long calcFileSize(File file){
@@ -41,7 +42,11 @@ public class UploadTask implements Runnable {
         }
     }
 
-    public UploadTask(FtpClient ftpClient,File file,long alreadyUpSize,String curFilePath,long curUpSize) throws Exception {
+    public UploadTask() {
+    }
+
+    //这个函数可以不用了ftpClient用set注入，写参数的时候用下面的构造函数
+    public UploadTask(FtpClient ftpClient, File file, long alreadyUpSize, String curFilePath, long curUpSize) throws Exception {
        fileSize = calcFileSize(file);
        this.alreadyUpSize = alreadyUpSize;
        uploadFile = file;
@@ -52,6 +57,17 @@ public class UploadTask implements Runnable {
        if(alreadyUpSize==0){
            setExit(false);
        }
+    }
+
+    public UploadTask(File file, long alreadyUpSize, String curFilePath, long curUpSize) throws Exception {
+        fileSize = calcFileSize(file);
+        this.alreadyUpSize = alreadyUpSize;
+        uploadFile = file;
+        this.curFilePath = curFilePath;
+        this.curUpSize = curUpSize;
+        if(alreadyUpSize==0){
+            setExit(false);
+        }
     }
 
     public long getFileSize() {
@@ -92,6 +108,12 @@ public class UploadTask implements Runnable {
 
     public void setCurFilePath(String curFilePath) {
         this.curFilePath = curFilePath;
+    }
+
+    //设置FtpClient
+    public void setFtpClient(FtpClient ftpClient) throws Exception {
+        this.ftpClient = new FtpClient(ftpClient);
+        this.ftpClient.login();
     }
 
     //上传文件
