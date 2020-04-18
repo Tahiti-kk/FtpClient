@@ -5,6 +5,8 @@ import ftp.FtpFile;
 import ftp.UploadTask;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
@@ -70,7 +72,10 @@ public class Controller implements Initializable {
     @FXML
     private VBox fx_uploadVbox;
 
+    //新建文件夹时利用变量记录文件夹名称
+    private String newFileName = "";
 
+    //与服务器端连接
     private FtpClient ftpClient = null;
 
     //界面展现初始化
@@ -279,16 +284,12 @@ public class Controller implements Initializable {
     public void Click_cmd(MouseEvent me){
         fx_infoText.setVisible(false);
         fx_cmdText.setVisible(true);
-        //对cmdText文本进行设置
-        fx_cmdText.setText("这是cmd窗口");
     }
 
     //info窗口信息
     public void Click_info(MouseEvent me){
         fx_cmdText.setVisible(false);
         fx_infoText.setVisible(true);
-        //对infoText文本进行设置
-        fx_infoText.setText("这是info窗口");
     }
 
     //切换文件列表
@@ -302,6 +303,41 @@ public class Controller implements Initializable {
         fx_fileHbox.setVisible(false);
         fx_progressAcc.setVisible(true);
     }
+
+    //服务器端新建文件夹
+    public void sever_addDir(){
+        Stage stage = new Stage();
+        Label l = new Label("输入新文件名称：");
+        TextField tx = new TextField();
+        Button bt = new Button("确定");
+        bt.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                newFileName = tx.getText();
+                try {
+                    ftpClient.makeDirectory(newFileName);
+                }catch (Exception e){
+                    System.out.println(e.getMessage());
+                }
+                newFileName = "";
+            }
+        });
+        Pane p = new Pane(l,tx,bt);
+        Scene s = new Scene(p, 200, 200);
+        stage.setScene(s);
+        stage.show();
+    }
+
+    //服务器端删除文件或者文件夹
+    public void sever_deleteFile(){
+
+    }
+
+    //服务器端重命名文件或文件夹
+    public void sever_renameFile(){
+
+    }
+
 
     //刷新本地文件列表
     private void refreshLocalList(){
