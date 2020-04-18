@@ -1,9 +1,6 @@
 package ftp;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.util.ArrayList;
 
 /**
@@ -11,16 +8,17 @@ import java.util.ArrayList;
  * @date : 2020-03-16 13:53
  * @description: TODO
  */
-public class DownloadTask implements Runnable {
+public class DownloadTask implements Runnable, Serializable {
 
-    private FtpFile ftpFile;
+    private  FtpFile ftpFile;
 
     private String localDir;
 
     private boolean begin=false;//判断何时开始
     private boolean exit=true;//判断何时退出
 
-    private FtpClient ftpClient;
+    //不序列化ftpClient
+    private transient FtpClient ftpClient;
 
     private long fileSize;
 
@@ -33,6 +31,10 @@ public class DownloadTask implements Runnable {
     // 暂停时当前文件下载大小
     private long curDownSize;
 
+    public DownloadTask() {
+    }
+
+    //这个好像没用了，用下面那个构造函数，因为ftpclient不能序列化，要用set注入
     public DownloadTask(FtpFile ftpFile, FtpClient ftpClient, long alreadyDownSize, String curFilePath, long curDownSize, String localDir) throws Exception {
         this.ftpFile = ftpFile;
         this.ftpClient = new FtpClient(ftpClient);
@@ -46,6 +48,19 @@ public class DownloadTask implements Runnable {
             setExit(false);
         }
     }
+
+    public DownloadTask(FtpFile ftpFile, long alreadyDownSize, String curFilePath, long curDownSize, String localDir) throws Exception {
+        this.ftpFile = ftpFile;
+        this.fileSize = calcFtpFileSize(ftpFile);
+        this.alreadyDownSize = alreadyDownSize;
+        this.curFilePath = curFilePath;
+        this.curDownSize = curDownSize;
+        this.localDir = localDir;
+        if(alreadyDownSize==0){
+            setExit(false);
+        }
+    }
+
 
     public boolean isBegin() {
         return begin;
@@ -82,6 +97,12 @@ public class DownloadTask implements Runnable {
     public void setCurDownSize(long curDownSize){ this.curDownSize = curDownSize; }
 
     public long getCurDownSize(){ return curDownSize;}
+
+    //设置FtpClient
+    public void setFtpClient(FtpClient ftpClient) throws Exception {
+        this.ftpClient = new FtpClient(ftpClient);
+        this.ftpClient.login();
+    }
 
     //计算文件大小，单位为byte
     public long calcFtpFileSize(FtpFile file) throws Exception {
@@ -215,5 +236,18 @@ public class DownloadTask implements Runnable {
         setExit(true);
     }
 
-
+    @Override
+    public String toString() {
+        return "DownloadTask{" +
+                "ftpFile=" + ftpFile +
+                ", localDir='" + localDir + '\'' +
+                ", begin=" + begin +
+                ", exit=" + exit +
+                ", ftpClient=" + ftpClient +
+                ", fileSize=" + fileSize +
+                ", alreadyDownSize=" + alreadyDownSize +
+                ", curFilePath='" + curFilePath + '\'' +
+                ", curDownSize=" + curDownSize +
+                '}';
+    }
 }

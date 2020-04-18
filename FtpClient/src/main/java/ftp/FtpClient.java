@@ -13,7 +13,7 @@ import static ftp.FtpFile.parseFile;
  * @author JerryLee
  * @date 2020/3/3
  */
-public class FtpClient {
+public class FtpClient{
 
     private String host = null;
 
