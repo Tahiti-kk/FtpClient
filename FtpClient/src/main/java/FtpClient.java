@@ -1,8 +1,13 @@
+import controller.Controller;
 import javafx.application.Application;
+import javafx.event.EventHandler;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+import service.TaskService;
 
 import java.net.URL;
 
@@ -15,10 +20,28 @@ public class FtpClient extends Application{
     @Override
     public void start(Stage primaryStage) throws Exception{
         URL resourse = getClass().getResource("sample.fxml");
-        Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        primaryStage.setTitle("Hello World");
-        Scene scene = new Scene(root, 1200, 800);
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("sample.fxml"));
+        Parent root = loader.load();
+        Controller controller = loader.getController();
+        primaryStage.setTitle("FTP Client");
+        Scene scene = new Scene(root, 1200, 600);
         primaryStage.setScene(scene);
+
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent windowEvent) {
+                try {
+                    TaskService taskService = controller.getTaskService();
+                    if(taskService.getDownloadTaskList().size() > 0 || taskService.getUploadTaskList().size() > 0) {
+                        String fileName = controller.getFtpClientIp() + ".dat";
+                        TaskService.SerializeTaskService(taskService, fileName);
+                    }
+                }catch (Exception e){
+                    System.out.println(e);
+                }
+            }
+        });
+
         primaryStage.show();
     }
 

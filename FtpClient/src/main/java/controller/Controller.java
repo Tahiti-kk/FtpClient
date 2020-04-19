@@ -1,11 +1,9 @@
 
 package controller;
-import ftp.DownloadTask;
-import ftp.FtpClient;
-import ftp.FtpFile;
-import ftp.UploadTask;
+import ftp.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -19,11 +17,10 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import service.TaskService;
 import util.CmdListener;
 import util.InfoListener;
 
@@ -52,11 +49,6 @@ public class Controller implements Initializable {
     @FXML
     private Label fx_severPath;
 
-//    @FXML
-//    private MenuButton fx_downloadMenu;
-//    @FXML
-//    private MenuButton fx_uploadMenu;
-
     //cmd和info窗口
     @FXML
     private TextArea fx_cmdText;
@@ -79,11 +71,23 @@ public class Controller implements Initializable {
     //与服务器端连接
     private FtpClient ftpClient = null;
 
+    //传输服务
+    private TaskService taskService = new TaskService();
+
+    public TaskService getTaskService() {
+        return taskService;
+    }
+
+    public String getFtpClientIp(){
+        return ftpClient.gethost();
+    }
+
     //界面展现初始化
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        ObservableList<String> items = FXCollections.observableArrayList(GetFiles.getRootFiles());
+        ObservableList<String> items = FXCollections.observableArrayList(LocalFiles.getRootFiles());
         fileList.setItems(items);
+
     }
 
     //双击本地文件列表事件
@@ -91,12 +95,12 @@ public class Controller implements Initializable {
         if(event.getClickCount()==2 && event.getButton().name().equals("PRIMARY")){
             if(currentFilePath.equals("")){
                 currentFilePath = fileList.getSelectionModel().getSelectedItem();
-                fileList.setItems(FXCollections.observableArrayList(GetFiles.getFiles(currentFilePath)));
+                fileList.setItems(FXCollections.observableArrayList(LocalFiles.getFiles(currentFilePath)));
             }
-            else if(GetFiles.isFileDirectory(currentFilePath)){
+            else if(LocalFiles.isFileDirectory(currentFilePath)){
                 currentFilePath += fileList.getSelectionModel().getSelectedItem();
                 currentFilePath += "\\";
-                fileList.setItems(FXCollections.observableArrayList(GetFiles.getFiles(currentFilePath)));
+                fileList.setItems(FXCollections.observableArrayList(LocalFiles.getFiles(currentFilePath)));
             }
             fx_localPath.setText(currentFilePath);
         }
@@ -129,14 +133,14 @@ public class Controller implements Initializable {
 
     //本地文件back按键点击事件
     public void back_btn_Click(MouseEvent event){
-        if(GetFiles.isRoot(currentFilePath)){
-            ObservableList<String> items = FXCollections.observableArrayList(GetFiles.getRootFiles());
+        if(LocalFiles.isRoot(currentFilePath)){
+            ObservableList<String> items = FXCollections.observableArrayList(LocalFiles.getRootFiles());
             fileList.setItems(items);
             currentFilePath = "";
         }else if(currentFilePath.equals("")){
         }else {
-            String path = GetFiles.getParentPath(currentFilePath);
-            fileList.setItems(FXCollections.observableArrayList(GetFiles.getFiles(path)));
+            String path = LocalFiles.getParentPath(currentFilePath);
+            fileList.setItems(FXCollections.observableArrayList(LocalFiles.getFiles(path)));
             currentFilePath = path;
         }
         fx_localPath.setText(currentFilePath);
@@ -174,6 +178,13 @@ public class Controller implements Initializable {
         } else {
             try {
                 ftpClient = new FtpClient(ip, Integer.parseInt(port), account, password);
+                String fileName = ip + ".dat";
+                File file = new File(fileName);
+                if(file.exists()){
+                    taskService = TaskService.DeSerializeTaskService(fileName);
+                    createProcess();
+                }
+                taskService.setFtpClientInTasks(ftpClient);
 
                 // 添加日志信息接口
                 CmdListener cmdListener = new CmdListener(fx_cmdText);
@@ -205,40 +216,70 @@ public class Controller implements Initializable {
                     if (ftpClient != null) {
                         File file = new File(currentFilePath + s);
                         UploadTask uploadTask=new UploadTask(ftpClient,file,0,null,0);
+                        taskService.addUploadTask(uploadTask);
+
+                        //向进程列表中添加进度条和暂停继续按钮
+                        HBox hbox = new HBox();
                         ProgressBar progressBar = new ProgressBar();
-                        fx_uploadVbox.getChildren().add(progressBar);
-                        Thread t_upload = new Thread(uploadTask);
-                        Thread t = new Thread(new Runnable() {
+                        progressBar.setPrefWidth(200);
+                        Button button = new Button("暂停");
+                        //为button添加匿名按键事件
+                        button.setOnAction(new EventHandler<ActionEvent>() {
                             @Override
-                            public void run() {
-                                while (uploadTask.getAlreadyUpSize() < uploadTask.getFileSize()) {
-                                    progressBar.setProgress(((double) (uploadTask.getAlreadyUpSize())) / (uploadTask.getFileSize()));
-                                    System.out.println("进度：" + uploadTask.getAlreadyUpSize());
-                                }
+                            public void handle(ActionEvent actionEvent) {
+                                setUploadPasuseAction(button,uploadTask,progressBar);
+//                                if(button.getText().equals("暂停")){
+//                                    button.setText("继续");
+//                                    taskService.stopUploadTask(uploadTask);
+//                                }else if(button.getText().equals("继续")){
+//                                    button.setText("暂停");
+//                                    taskService.startUploadTask(uploadTask);
+//                                    Task<Void> task = new Task<Void>() {
+//                                        @Override
+//                                        protected Void call() throws Exception {
+//                                            while (uploadTask.getAlreadyUpSize() < uploadTask.getFileSize() && !uploadTask.isExit()) {
+//                                                System.out.println("进度：" + uploadTask.getAlreadyUpSize());
+//                                                progressBar.setProgress(((double) (uploadTask.getAlreadyUpSize())) / (uploadTask.getFileSize()));
+//                                            }
+//                                            if(uploadTask.getAlreadyUpSize() >= uploadTask.getFileSize()){
+//                                                refreshLocalList();
+//                                            }
+//                                            return null;
+//                                        }
+//                                    };
+//                                    progressBar.progressProperty().bind(task.progressProperty());
+//                                    Thread t = new Thread(task);
+//                                    t.start();
+//                                }
                             }
                         });
+                        hbox.getChildren().addAll(progressBar,button);
+                        fx_uploadVbox.getChildren().add(hbox);
+
+                        //更新进度条
+                        Task<Void> task = new Task<Void>() {
+                            @Override
+                            protected Void call() throws Exception {
+                                while (uploadTask.getAlreadyUpSize() < uploadTask.getFileSize() && !uploadTask.isExit()) {
+                                    updateProgress(uploadTask.getAlreadyUpSize(),uploadTask.getFileSize());
+                                    System.out.println("进度：" + uploadTask.getAlreadyUpSize());
+                                }
+                                if(uploadTask.getAlreadyUpSize() >= uploadTask.getFileSize()){
+                                    refreshLocalList();
+                                }
+                                return null;
+                            }
+                        };
+                        progressBar.progressProperty().bind(task.progressProperty());
+                        Thread t = new Thread(task);
                         t.start();
-                        t_upload.start();
+                        taskService.startUploadTask(uploadTask);
                     }
                 }
                 refreshSeverList();
             }catch (Exception ex){
                 System.out.println(ex.getMessage());
             }
-        }
-    }
-
-    //刷新服务器文件列表文件
-    private void refreshSeverList(){
-        try {
-            if(ftpClient != null) {
-                ArrayList<FtpFile> ftpFiles = ftpClient.getAllFiles();
-                ArrayList<String> ftpFilesName = getFtpFileNames(ftpFiles);
-                ObservableList<String> items = FXCollections.observableArrayList(ftpFilesName);
-                severList.setItems(items);
-            }
-        }catch (Exception e){
-            System.out.println(e.getMessage());
         }
     }
 
@@ -256,20 +297,80 @@ public class Controller implements Initializable {
                         for(FtpFile f:ftpFiles){
                             if(s.equals(f.getFileName())) {
                                 DownloadTask downloadTask = new DownloadTask(f, ftpClient, 0, null, 0, currentFilePath);
+                                taskService.addDownloadTask(downloadTask);
+
+                                //向进程列表中添加进度条和暂停继续按钮
+                                HBox hbox = new HBox();
                                 ProgressBar progressBar = new ProgressBar();
-                                fx_downloadVbox.getChildren().add(progressBar);
-                                Thread t_download = new Thread(downloadTask);
-                                Thread t = new Thread(new Runnable() {
+                                progressBar.setPrefWidth(200);
+                                Button button = new Button("暂停");
+                                //为button添加匿名按键事件
+                                button.setOnAction(new EventHandler<ActionEvent>() {
                                     @Override
-                                    public void run() {
-                                        while (downloadTask.getAlreadyDownSize() < downloadTask.getFileSize()) {
-                                            progressBar.setProgress(((double) (downloadTask.getAlreadyDownSize())) / (downloadTask.getFileSize()));
-                                            System.out.println("进度：" + downloadTask.getAlreadyDownSize());
-                                        }
+                                    public void handle(ActionEvent actionEvent) {
+                                        setDownloadPauseAction(button,downloadTask,progressBar);
+//                                        if(button.getText().equals("暂停")){
+//                                            button.setText("继续");
+//                                            taskService.stopDownloadTask(downloadTask);
+//                                        }else if(button.getText().equals("继续")){
+//                                            button.setText("暂停");
+//                                            taskService.startDownloadTask(downloadTask);
+//                                            Task<Void> task = new Task<Void>() {
+//                                                @Override
+//                                                protected Void call() throws Exception {
+//                                                    while (downloadTask.getAlreadyDownSize() < downloadTask.getFileSize() && !downloadTask.isExit()) {
+//                                                        updateProgress(downloadTask.getAlreadyDownSize(),downloadTask.getFileSize());
+//                                                        System.out.println("进度：" + downloadTask.getAlreadyDownSize());
+//                                                    }
+//                                                    if(downloadTask.getAlreadyDownSize() >= downloadTask.getFileSize()){
+//                                                        refreshLocalList();
+//                                                    }
+//                                                    return null;
+//                                                }
+//                                            };
+//                                            progressBar.progressProperty().bind(task.progressProperty());
+//                                            Thread t = new Thread(task);
+//                                            t.start();
+//                                        }
                                     }
                                 });
+                                hbox.getChildren().addAll(progressBar,button);
+                                fx_downloadVbox.getChildren().add(hbox);
+
+                                //创建进度显示的线程
+                                //Thread t_download = new Thread(downloadTask);
+//                                Thread t = new Thread(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        while (downloadTask.getAlreadyDownSize() < downloadTask.getFileSize() && !downloadTask.isExit()) {
+//                                            progressBar.setProgress(((double) (downloadTask.getAlreadyDownSize())) / (downloadTask.getFileSize()));
+//                                            System.out.println("进度：" + downloadTask.getAlreadyDownSize());
+//                                        }
+//                                        if(downloadTask.getAlreadyDownSize() >= downloadTask.getFileSize()){
+//                                            refreshLocalList();
+//                                        }
+//                                    }
+//                                });
+
+                                //javafx不允许非javafx主线程更改组件信息，下图为解决方法
+                                Task<Void> task = new Task<Void>() {
+                                    @Override
+                                    protected Void call() throws Exception {
+                                        while (downloadTask.getAlreadyDownSize() < downloadTask.getFileSize() && !downloadTask.isExit()) {
+                                            System.out.println("进度：" + downloadTask.getAlreadyDownSize());
+                                            updateProgress(downloadTask.getAlreadyDownSize(),downloadTask.getFileSize());
+                                        }
+                                        if(downloadTask.getAlreadyDownSize() >= downloadTask.getFileSize()){
+                                            refreshLocalList();
+                                        }
+                                        return null;
+                                    }
+                                };
+                                progressBar.progressProperty().bind(task.progressProperty());
+                                Thread t = new Thread(task);
                                 t.start();
-                                t_download.start();
+                                //t_download.start();
+                                taskService.startDownloadTask(downloadTask);
                             }
                         }
                     }
@@ -317,39 +418,204 @@ public class Controller implements Initializable {
                 newFileName = tx.getText();
                 try {
                     ftpClient.makeDirectory(newFileName);
+                    refreshSeverList();
+                    Stage stage = (Stage)bt.getScene().getWindow();
+                    stage.close();
                 }catch (Exception e){
                     System.out.println(e.getMessage());
                 }
                 newFileName = "";
             }
         });
-        Pane p = new Pane(l,tx,bt);
-        Scene s = new Scene(p, 200, 200);
-        stage.setScene(s);
+        VBox vBox = new VBox(l,tx,bt);
+        Scene scene = new Scene(vBox, 200, 200);
+        stage.setScene(scene);
         stage.show();
+    }
+
+
+    //服务器端重命名文件或文件夹
+    public void sever_renameFile(){
+        if(severList.getSelectionModel().getSelectedItems().size() != 0 && ftpClient != null){
+            try {
+                ArrayList<FtpFile> ftpFiles = ftpClient.getAllFiles();
+                for(String s:severList.getSelectionModel().getSelectedItems()) {
+                    for (FtpFile fx : ftpFiles) {
+                        if (fx.getFileName().equals(s)) {
+                            Stage stage = new Stage();
+                            Label l = new Label("输入新文件名称：");
+                            TextField tx = new TextField(fx.getFileName());
+                            Button bt = new Button("确定");
+                            bt.setOnAction(new EventHandler<ActionEvent>() {
+                                @Override
+                                public void handle(ActionEvent event) {
+                                    newFileName = tx.getText();
+                                    try {
+                                        ftpClient.rename(fx.getFileName(),newFileName);
+                                        refreshSeverList();
+                                        Stage stage = (Stage)bt.getScene().getWindow();
+                                        stage.close();
+                                    }catch (Exception e){
+                                        System.out.println(e.getMessage());
+                                    }
+                                    newFileName = "";
+                                }
+                            });
+                            VBox vBox = new VBox(l,tx,bt);
+                            Scene scene = new Scene(vBox, 200, 200);
+                            stage.setScene(scene);
+                            stage.show();
+                        }
+                    }
+                }
+                refreshSeverList();
+            }catch(Exception e){
+                System.out.println(e);
+            }
+        }
     }
 
     //服务器端删除文件或者文件夹
     public void sever_deleteFile(){
-
-    }
-
-    //服务器端重命名文件或文件夹
-    public void sever_renameFile(){
-
+        if(severList.getSelectionModel().getSelectedItems().size() == 1 && ftpClient != null){
+            try {
+                ArrayList<FtpFile> ftpFiles = ftpClient.getAllFiles();
+                for(String s:severList.getSelectionModel().getSelectedItems()) {
+                    for (FtpFile fx : ftpFiles) {
+                        if (fx.getFileName().equals(s)) {
+                            ftpClient.delete(fx);
+                            break;
+                        }
+                    }
+                }
+                refreshSeverList();
+            }catch(Exception e){
+                System.out.println(e);
+            }
+        }
     }
 
 
     //刷新本地文件列表
     private void refreshLocalList(){
         if(currentFilePath.equals("")){
-            ObservableList<String> items = FXCollections.observableArrayList(GetFiles.getRootFiles());
+            ObservableList<String> items = FXCollections.observableArrayList(LocalFiles.getRootFiles());
             fileList.setItems(items);
         }else{
-            fileList.setItems(FXCollections.observableArrayList(GetFiles.getFiles(currentFilePath)));
+            fileList.setItems(FXCollections.observableArrayList(LocalFiles.getFiles(currentFilePath)));
         }
     }
 
+    //刷新服务器文件列表文件
+    private void refreshSeverList(){
+        try {
+            if(ftpClient != null) {
+                ArrayList<FtpFile> ftpFiles = ftpClient.getAllFiles();
+                ArrayList<String> ftpFilesName = getFtpFileNames(ftpFiles);
+                ObservableList<String> items = FXCollections.observableArrayList(ftpFilesName);
+                severList.setItems(items);
+            }
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+    //设置下载暂停的的按键事件
+    private void setDownloadPauseAction(Button button,DownloadTask downloadTask,ProgressBar progressBar){
+        if(button.getText().equals("暂停")){
+            button.setText("继续");
+            taskService.stopDownloadTask(downloadTask);
+        }else if(button.getText().equals("继续")){
+            button.setText("暂停");
+            taskService.startDownloadTask(downloadTask);
+            Task<Void> task = new Task<Void>() {
+                @Override
+                protected Void call() throws Exception {
+                    while (downloadTask.getAlreadyDownSize() < downloadTask.getFileSize() && !downloadTask.isExit()) {
+                        updateProgress(downloadTask.getAlreadyDownSize(),downloadTask.getFileSize());
+                        System.out.println("进度：" + downloadTask.getAlreadyDownSize());
+                    }
+                    if(downloadTask.getAlreadyDownSize() >= downloadTask.getFileSize()){
+                        refreshLocalList();
+                    }
+                    return null;
+                }
+            };
+            progressBar.progressProperty().bind(task.progressProperty());
+            Thread t = new Thread(task);
+            t.start();
+        }
+    }
+
+    //设置上传暂停的按键事件
+    private void setUploadPasuseAction(Button button,UploadTask uploadTask,ProgressBar progressBar){
+        if(button.getText().equals("暂停")){
+            button.setText("继续");
+            taskService.stopUploadTask(uploadTask);
+        }else if(button.getText().equals("继续")) {
+            button.setText("暂停");
+            taskService.startUploadTask(uploadTask);
+            Task<Void> task = new Task<Void>() {
+                @Override
+                protected Void call() throws Exception {
+                    while (uploadTask.getAlreadyUpSize() < uploadTask.getFileSize() && !uploadTask.isExit()) {
+                        System.out.println("进度：" + uploadTask.getAlreadyUpSize());
+                        updateProgress(uploadTask.getAlreadyUpSize(),uploadTask.getFileSize());
+                    }
+                    if (uploadTask.getAlreadyUpSize() >= uploadTask.getFileSize()) {
+                        refreshLocalList();
+                    }
+                    return null;
+                }
+            };
+            progressBar.progressProperty().bind(task.progressProperty());
+            Thread t = new Thread(task);
+            t.start();
+        }
+    }
+
+    //为上次未完成的进度创建进度条
+    private void createProcess(){
+        if(taskService.getDownloadTaskList().size() > 0){
+            for(DownloadTask dt:taskService.getDownloadTaskList()){
+                HBox hbox = new HBox();
+                ProgressBar progressBar = new ProgressBar();
+                progressBar.setPrefWidth(200);
+                progressBar.setProgress(((double)(dt.getAlreadyDownSize()))/dt.getFileSize());
+                Button button = new Button("继续");
+                //为button添加匿名按键事件
+                button.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent actionEvent) {
+                        setDownloadPauseAction(button,dt, progressBar);
+                    }
+                });
+                hbox.getChildren().addAll(progressBar,button);
+                fx_downloadVbox.getChildren().add(hbox);
+            }
+        }
+        if(taskService.getUploadTaskList().size() > 0){
+            for(UploadTask ut:taskService.getUploadTaskList()){
+                //向进程列表中添加进度条和暂停继续按钮
+                HBox hbox = new HBox();
+                ProgressBar progressBar = new ProgressBar();
+                progressBar.setPrefWidth(200);
+                progressBar.setProgress(((double)(ut.getAlreadyUpSize()))/ut.getFileSize());
+                Button button = new Button("继续");
+                //为button添加匿名按键事件
+                button.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent actionEvent) {
+                        setUploadPasuseAction(button,ut,progressBar);
+                    }
+                });
+                hbox.getChildren().addAll(progressBar,button);
+                fx_uploadVbox.getChildren().add(hbox);
+            }
+        }
+    }
+
+    //获得所有的文件名
     private ArrayList<String> getFtpFileNames(ArrayList<FtpFile> ftpFiles){
         ArrayList<String> ftpFilesName = new ArrayList<>();
         for (FtpFile f : ftpFiles) {

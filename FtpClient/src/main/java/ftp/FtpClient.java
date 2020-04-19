@@ -178,11 +178,11 @@ public class FtpClient{
 
     // 文件重命名
     public boolean rename(String srcFile,String destFile) throws Exception{
-        String response = sendCommand("REFR "+srcFile);
+        String response = sendCommand("RNFR "+srcFile);
         if(!response.startsWith("350")){
             return false;
         }
-        response = sendCommand("RNFO "+destFile);
+        response = sendCommand("RNTO "+destFile);
         return response.startsWith("250");
     }
 
@@ -453,6 +453,10 @@ public class FtpClient{
         for(LoggerListener listener : this.loggerListeners) {
             listener.exceptionMsg(msg, type);
         }
+    }
+
+    public String gethost(){
+        return host;
     }
 
 

@@ -139,6 +139,7 @@ public class DownloadTask implements Runnable, Serializable {
             if(!response.startsWith("150")){
                 throw new Exception("file "+fileName+" download fail!");
             }
+
             //新建文件 TODO看后面考不考虑文件替换
             File file = new File(localPath + "\\" + fileName);
             if (!file.exists()) {

@@ -11,6 +11,14 @@ public class TaskService implements Serializable {
     private ArrayList<DownloadTask> downloadTaskList = new ArrayList<>();
     private ArrayList<UploadTask> uploadTaskList = new ArrayList<>();
 
+    public ArrayList<DownloadTask> getDownloadTaskList() {
+        return downloadTaskList;
+    }
+
+    public ArrayList<UploadTask> getUploadTaskList() {
+        return uploadTaskList;
+    }
+
     public TaskService() {
     }
 
@@ -53,6 +61,7 @@ public class TaskService implements Serializable {
     }
 
     public void startUploadTask(UploadTask ut){
+        ut.setExit(false);
         System.out.println("开始上传任务");
         Thread t = new Thread(ut);
         t.start();

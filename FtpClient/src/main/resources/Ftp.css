@@ -1,0 +1,51 @@
+.root {
+    -fx-font-size: 14px;
+    -fx-font-family: "microsoft yahei",Times New Roman;
+    -fx-background-color: #66CCCC;
+}
+.button{
+    -fx-background-color:gray;
+    -fx-text-fill:#fff;;
+}
+.button:hover{
+    -fx-background-color:#27a0cb;
+    -fx-cursor:hand ;
+}
+.list-cell{
+    -fx-background-color: lightblue;
+}
+.list-view{
+    -fx-background-color: lightblue;
+    -fx-border-width: 1px;
+    -fx-border-color: gray;
+}
+#fx_localAnchor{
+    -fx-border-width: 1px;
+    -fx-border-color: gray;
+}
+#fx_severAnchor{
+    -fx-border-width: 1px;
+    -fx-border-color: gray;
+}
+#fx_localPath{
+    -fx-background-color: lightblue;
+}
+#fx_severPath{
+    -fx-background-color: lightblue;
+}
+#fx_mainTab{
+    -fx-background-color:lightblue;
+    -fx-tab-max-height: 40px;
+    -fx-tab-min-height: 40px;
+    -fx-tab-min-width:120px;
+    -fx-tab-max-width:120px;
+}
+.tab{
+    -fx-background-color: lightblue;
+}
+.tab-pane *.tab-header-area *.tab-header-background{
+    -fx-background-color: grey;
+}
+.tab:selected{
+    -fx-background-color: lightskyblue;
+}
