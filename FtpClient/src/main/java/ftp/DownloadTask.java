@@ -127,8 +127,12 @@ public class DownloadTask implements Runnable, Serializable {
         try{
             // 如果为下载中文件，则开始断点续传
             if(isBegin()) {
+                // 使用BINARY模式传送文件；
+                if(!ftpClient.sendCommand("TYPE I").startsWith("200")) {
+                    throw new Exception("使用二进制模式失败!");
+                }
                 String response = ftpClient.sendCommand("REST "+getCurDownSize());
-                if(!response.startsWith("150")){
+                if(!response.startsWith("350")){
                     throw new Exception("file "+fileName+" continue download fail!");
                 }
                 setBegin(false);
@@ -157,7 +161,7 @@ public class DownloadTask implements Runnable, Serializable {
                 out.write(b, 0, bytesRead);
                 curSize+=bytesRead;
                 setAlreadyDownSize(alreadyDownSize+bytesRead);
-                System.out.println(Thread.currentThread().getName()+" 进度百分比：" + (double)alreadyDownSize/(double)fileSize);
+                System.out.println(Thread.currentThread().getName()+ ftpFile.getFileName()+" 进度百分比：" + (double)alreadyDownSize/(double)fileSize);
             }
             out.flush();
             out.close();
@@ -206,7 +210,7 @@ public class DownloadTask implements Runnable, Serializable {
         if(file.isDirectory()){
             downloadDir(file,localDir);
         }else{
-            if(ftpClient.getCurrentDir()+"\\"+file.getFileName()==curFilePath){
+            if((ftpClient.getCurrentDir()+"\\"+file.getFileName()).equals(curFilePath)){
                 setBegin(true);
             }
             if(!isExit()||begin) {
