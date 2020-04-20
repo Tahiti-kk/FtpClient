@@ -53,7 +53,7 @@
                   <Insets right="10.0" />
                </HBox.margin>
             </TextField>
-            <Button mnemonicParsing="false" onMouseClicked="#Connect_Btn_Click" prefHeight="36.0" prefWidth="80.0" text="连接">
+            <Button fx:id="fx_btnConnect" mnemonicParsing="false" onMouseClicked="#Connect_Btn_Click" prefHeight="36.0" prefWidth="80.0" text="连接">
                <HBox.margin>
                   <Insets left="10.0" />
                </HBox.margin></Button>
@@ -137,6 +137,32 @@
                   </Accordion>
                </content>
           </Tab>
+            <Tab text="传输完成">
+               <content>
+                  <VBox prefHeight="200.0" prefWidth="100.0">
+                     <children>
+                        <Label text="下载完成">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets left="10.0" top="5.0" />
+                           </VBox.margin>
+                        </Label>
+                        <ListView fx:id="fx_downOkList" prefHeight="108.0" prefWidth="1176.0" />
+                        <Label text="上传完成">
+                           <VBox.margin>
+                              <Insets left="10.0" top="5.0" />
+                           </VBox.margin>
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <ListView fx:id="fx_upOkList" prefHeight="130.0" prefWidth="1176.0" VBox.vgrow="ALWAYS" />
+                     </children>
+                  </VBox>
+               </content>
+            </Tab>
         </tabs>
       </TabPane>
       <TabPane fx:id="fx_infoTab" layoutX="8.0" layoutY="445.0" prefHeight="132.0" prefWidth="1176.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.leftAnchor="12.0" AnchorPane.rightAnchor="12.0" AnchorPane.topAnchor="450.0">

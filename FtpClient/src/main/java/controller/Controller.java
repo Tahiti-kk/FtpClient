@@ -1,6 +1,8 @@
 
 package controller;
 import ftp.*;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -56,6 +58,12 @@ public class Controller implements Initializable {
     private TextArea fx_cmdText;
     @FXML
     private TextArea fx_infoText;
+
+    //传输完成列表
+    @FXML
+    private ListView<String> fx_downOkList;
+    @FXML
+    private ListView<String> fx_upOkList;
 
     @FXML
     private HBox fx_fileHbox;
@@ -247,15 +255,16 @@ public class Controller implements Initializable {
 
                         //向进程列表中添加进度条和暂停继续按钮
                         HBox hbox = new HBox();
-                        Label upFileName = new Label(currentFilePath + s);
+                        Label upFileNameLab = new Label(currentFilePath + s);
                         ProgressBar progressBar = new ProgressBar();
                         progressBar.setPrefWidth(200);
-                        Button button = new Button("暂停");
-                        //为button添加匿名按键事件
-                        button.setOnAction(new EventHandler<ActionEvent>() {
+                        Button pauseButton = new Button("暂停");
+                        Button cancelButton = new Button("取消");
+                        //为pauseButton添加匿名按键事件
+                        pauseButton.setOnAction(new EventHandler<ActionEvent>() {
                             @Override
                             public void handle(ActionEvent actionEvent) {
-                                setUploadPasuseAction(button,uploadTask,progressBar,upFileName);
+                                setUploadPasuseAction(pauseButton,uploadTask,progressBar,upFileNameLab,hbox);
 //                                if(button.getText().equals("暂停")){
 //                                    button.setText("继续");
 //                                    taskService.stopUploadTask(uploadTask);
@@ -281,8 +290,18 @@ public class Controller implements Initializable {
 //                                }
                             }
                         });
-                        hbox.getChildren().addAll(progressBar,button);
-                        fx_uploadVbox.getChildren().add(upFileName);
+                        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
+                            @Override
+                            public void handle(ActionEvent actionEvent) {
+                                uploadTask.pauseUpload();
+                                taskService.delUploadTask(uploadTask);
+                                fx_uploadVbox.getChildren().remove(hbox);
+                                fx_uploadVbox.getChildren().remove(upFileNameLab);
+                            }
+                        });
+
+                        hbox.getChildren().addAll(progressBar,pauseButton,cancelButton);
+                        fx_uploadVbox.getChildren().add(upFileNameLab);
                         fx_uploadVbox.getChildren().add(hbox);
 
                         //更新进度条
@@ -295,11 +314,21 @@ public class Controller implements Initializable {
                                 }
                                 if(uploadTask.getAlreadyUpSize() >= uploadTask.getFileSize()){
                                     updateProgress(1,1);
-                                    refreshSeverList();
                                 }
                                 return null;
                             }
                         };
+                        task.progressProperty().addListener(new ChangeListener<Number>() {
+                            @Override
+                            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number newValue) {
+                                if(newValue.doubleValue() == 1){
+                                    refreshSeverList();
+                                    fx_upOkList.getItems().add(uploadTask.getUpFileName());
+                                    fx_uploadVbox.getChildren().remove(hbox);
+                                    fx_uploadVbox.getChildren().remove(upFileNameLab);
+                                }
+                            }
+                        });
                         progressBar.progressProperty().bind(task.progressProperty());
                         Thread t = new Thread(task);
                         t.start();
@@ -333,15 +362,16 @@ public class Controller implements Initializable {
 
                                 //向进程列表中添加进度条和暂停继续按钮
                                 HBox hbox = new HBox();
-                                Label downFileName = new Label(f.getFileName());
+                                Label downFileNameLab = new Label(f.getFileName());
                                 ProgressBar progressBar = new ProgressBar();
                                 progressBar.setPrefWidth(200);
-                                Button button = new Button("暂停");
-                                //为button添加匿名按键事件
-                                button.setOnAction(new EventHandler<ActionEvent>() {
+                                Button pauseButton = new Button("暂停");
+                                Button cancelButton = new Button("取消");
+                                //为pauseButton添加匿名按键事件
+                                pauseButton.setOnAction(new EventHandler<ActionEvent>() {
                                     @Override
                                     public void handle(ActionEvent actionEvent) {
-                                        setDownloadPauseAction(button,downloadTask,progressBar,downFileName);
+                                        setDownloadPauseAction(pauseButton,downloadTask,progressBar, downFileNameLab,hbox);
 //                                        if(button.getText().equals("暂停")){
 //                                            button.setText("继续");
 //                                            taskService.stopDownloadTask(downloadTask);
@@ -367,8 +397,18 @@ public class Controller implements Initializable {
 //                                        }
                                     }
                                 });
-                                hbox.getChildren().addAll(progressBar,button);
-                                fx_downloadVbox.getChildren().add(downFileName);
+                                //为cancelButton添加匿名事件
+                                cancelButton.setOnAction(new EventHandler<ActionEvent>() {
+                                    @Override
+                                    public void handle(ActionEvent actionEvent) {
+                                        downloadTask.pauseDownload();
+                                        taskService.delDownloadTask(downloadTask);
+                                        fx_downloadVbox.getChildren().remove(hbox);
+                                        fx_downloadVbox.getChildren().remove(downFileNameLab);
+                                    }
+                                });
+                                hbox.getChildren().addAll(progressBar,pauseButton,cancelButton);
+                                fx_downloadVbox.getChildren().add(downFileNameLab);
                                 fx_downloadVbox.getChildren().add(hbox);
 
                                 //创建进度显示的线程
@@ -401,6 +441,18 @@ public class Controller implements Initializable {
                                         return null;
                                     }
                                 };
+                                task.progressProperty().addListener(new ChangeListener<Number>() {
+                                    @Override
+                                    public void changed(ObservableValue<? extends Number> observableValue, Number number, Number newValue) {
+                                        if(newValue.doubleValue() == 1){
+                                            refreshLocalList();
+                                            fx_upOkList.getItems().add(downloadTask.getDownFileName());
+                                            fx_downloadVbox.getChildren().remove(hbox);
+                                            fx_downloadVbox.getChildren().remove(downFileNameLab);
+
+                                        }
+                                    }
+                                });
                                 progressBar.progressProperty().bind(task.progressProperty());
                                 Thread t = new Thread(task);
                                 t.start();
@@ -467,7 +519,6 @@ public class Controller implements Initializable {
         stage.setScene(scene);
         stage.show();
     }
-
 
     //服务器端重命名文件或文件夹
     public void sever_renameFile(){
@@ -629,7 +680,7 @@ public class Controller implements Initializable {
     }
 
     //设置下载暂停的的按键事件
-    private void setDownloadPauseAction(Button button,DownloadTask downloadTask,ProgressBar progressBar,Label label){
+    private void setDownloadPauseAction(Button button,DownloadTask downloadTask,ProgressBar progressBar,Label label,HBox hBox){
         if(button.getText().equals("暂停")){
             button.setText("继续");
             taskService.stopDownloadTask(downloadTask);
@@ -647,11 +698,21 @@ public class Controller implements Initializable {
                     }
                     if(downloadTask.getAlreadyDownSize() >= downloadTask.getFileSize()){
                         updateProgress(1,1);
-                        refreshLocalList();
                     }
                     return null;
                 }
             };
+            task.progressProperty().addListener(new ChangeListener<Number>() {
+                @Override
+                public void changed(ObservableValue<? extends Number> observableValue, Number number, Number newValue) {
+                    if(newValue.doubleValue() == 1){
+                        fx_upOkList.getItems().add(downloadTask.getDownFileName());
+                        fx_downloadVbox.getChildren().remove(hBox);
+                        fx_downloadVbox.getChildren().remove(label);
+                        refreshLocalList();
+                    }
+                }
+            });
             progressBar.progressProperty().bind(task.progressProperty());
             label.textProperty().bind(task.messageProperty());
             Thread t = new Thread(task);
@@ -660,7 +721,7 @@ public class Controller implements Initializable {
     }
 
     //设置上传暂停的按键事件
-    private void setUploadPasuseAction(Button button,UploadTask uploadTask,ProgressBar progressBar,Label label){
+    private void setUploadPasuseAction(Button button,UploadTask uploadTask,ProgressBar progressBar,Label label,HBox hBox){
         if(button.getText().equals("暂停")){
             button.setText("继续");
             taskService.stopUploadTask(uploadTask);
@@ -678,11 +739,21 @@ public class Controller implements Initializable {
                     }
                     if (uploadTask.getAlreadyUpSize() >= uploadTask.getFileSize()) {
                         updateProgress(1,1);
-                        refreshLocalList();
                     }
                     return null;
                 }
             };
+            task.progressProperty().addListener(new ChangeListener<Number>() {
+                @Override
+                public void changed(ObservableValue<? extends Number> observableValue, Number number, Number newValue) {
+                    if(newValue.doubleValue() == 1){
+                        fx_upOkList.getItems().add(uploadTask.getUpFileName());
+                        fx_uploadVbox.getChildren().remove(label);
+                        fx_uploadVbox.getChildren().remove(hBox);
+                        refreshSeverList();
+                    }
+                }
+            });
             progressBar.progressProperty().bind(task.progressProperty());
             label.textProperty().bind(task.messageProperty());
             Thread t = new Thread(task);
@@ -695,40 +766,61 @@ public class Controller implements Initializable {
         if(taskService.getDownloadTaskList().size() > 0){
             for(DownloadTask dt:taskService.getDownloadTaskList()){
                 HBox hbox = new HBox();
-                Label downFileName = new Label(dt.getCurFilePath());
+                Label downFileNameLab = new Label(dt.getCurFilePath());
                 ProgressBar progressBar = new ProgressBar();
                 progressBar.setPrefWidth(200);
                 progressBar.setProgress(((double)(dt.getAlreadyDownSize()))/dt.getFileSize());
-                Button button = new Button("继续");
+                Button pauseButton = new Button("继续");
+                Button cancelButton = new Button("取消");
                 //为button添加匿名按键事件
-                button.setOnAction(new EventHandler<ActionEvent>() {
+                cancelButton.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent actionEvent) {
-                        setDownloadPauseAction(button,dt, progressBar,downFileName);
+                        dt.pauseDownload();
+                        taskService.delDownloadTask(dt);
+                        fx_downloadVbox.getChildren().remove(hbox);
+                        fx_downloadVbox.getChildren().remove(downFileNameLab);
                     }
                 });
-                hbox.getChildren().addAll(progressBar,button);
-                fx_downloadVbox.getChildren().addAll(downFileName,hbox);
+                pauseButton.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent actionEvent) {
+                        setDownloadPauseAction(pauseButton,dt, progressBar,downFileNameLab,hbox);
+                    }
+                });
+
+                hbox.getChildren().addAll(progressBar,pauseButton,cancelButton);
+                fx_downloadVbox.getChildren().addAll(downFileNameLab,hbox);
             }
         }
         if(taskService.getUploadTaskList().size() > 0){
             for(UploadTask ut:taskService.getUploadTaskList()){
                 //向进程列表中添加进度条和暂停继续按钮
                 HBox hbox = new HBox();
-                Label upFileName = new Label(ut.getCurFilePath());
+                Label upFileNameLab = new Label(ut.getCurFilePath());
                 ProgressBar progressBar = new ProgressBar();
                 progressBar.setPrefWidth(200);
                 progressBar.setProgress(((double)(ut.getAlreadyUpSize()))/ut.getFileSize());
-                Button button = new Button("继续");
+                Button cancelButton = new Button("取消");
+                Button pauseButton = new Button("继续");
                 //为button添加匿名按键事件
-                button.setOnAction(new EventHandler<ActionEvent>() {
+                cancelButton.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent actionEvent) {
-                        setUploadPasuseAction(button,ut,progressBar,upFileName);
+                        ut.pauseUpload();
+                        taskService.delUploadTask(ut);
+                        fx_uploadVbox.getChildren().remove(hbox);
+                        fx_uploadVbox.getChildren().remove(upFileNameLab);
                     }
                 });
-                hbox.getChildren().addAll(progressBar,button);
-                fx_uploadVbox.getChildren().addAll(upFileName,hbox);
+                pauseButton.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent actionEvent) {
+                        setUploadPasuseAction(pauseButton,ut,progressBar,upFileNameLab,hbox);
+                    }
+                });
+                hbox.getChildren().addAll(progressBar,pauseButton,cancelButton);
+                fx_uploadVbox.getChildren().addAll(upFileNameLab,hbox);
             }
         }
     }

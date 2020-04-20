@@ -112,6 +112,8 @@ public class UploadTask implements Runnable,Serializable {
 
     public String getCurFilePath(){ return curFilePath;}
 
+    public String getUpFileName(){return uploadFile.getName();}
+
     //设置FtpClient
     public void setFtpClient(FtpClient ftpClient) throws Exception {
         this.ftpClient = new FtpClient(ftpClient);
