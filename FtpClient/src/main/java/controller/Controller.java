@@ -265,7 +265,7 @@ public class Controller implements Initializable {
                                     System.out.println("进度：" + uploadTask.getAlreadyUpSize());
                                 }
                                 if(uploadTask.getAlreadyUpSize() >= uploadTask.getFileSize()){
-                                    refreshLocalList();
+                                    refreshSeverList();
                                 }
                                 return null;
                             }
@@ -276,7 +276,6 @@ public class Controller implements Initializable {
                         taskService.startUploadTask(uploadTask);
                     }
                 }
-                refreshSeverList();
             }catch (Exception ex){
                 System.out.println(ex.getMessage());
             }
@@ -531,6 +530,7 @@ public class Controller implements Initializable {
             Task<Void> task = new Task<Void>() {
                 @Override
                 protected Void call() throws Exception {
+                    updateProgress(downloadTask.getAlreadyDownSize(),downloadTask.getFileSize());
                     while (downloadTask.getAlreadyDownSize() < downloadTask.getFileSize() && !downloadTask.isExit()) {
                         updateProgress(downloadTask.getAlreadyDownSize(),downloadTask.getFileSize());
                         System.out.println("进度：" + downloadTask.getAlreadyDownSize());
@@ -558,6 +558,7 @@ public class Controller implements Initializable {
             Task<Void> task = new Task<Void>() {
                 @Override
                 protected Void call() throws Exception {
+                    updateProgress(uploadTask.getAlreadyUpSize(),uploadTask.getFileSize());
                     while (uploadTask.getAlreadyUpSize() < uploadTask.getFileSize() && !uploadTask.isExit()) {
                         System.out.println("进度：" + uploadTask.getAlreadyUpSize());
                         updateProgress(uploadTask.getAlreadyUpSize(),uploadTask.getFileSize());

@@ -11,11 +11,7 @@
     -fx-background-color:#27a0cb;
     -fx-cursor:hand ;
 }
-.list-cell{
-    -fx-background-color: lightblue;
-}
 .list-view{
-    -fx-background-color: lightblue;
     -fx-border-width: 1px;
     -fx-border-color: gray;
 }
