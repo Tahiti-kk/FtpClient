@@ -6,7 +6,7 @@ import java.util.ArrayList;
 /**
  * @author : Byron0648
  * @date : 2020-03-16 13:53
- * @description: TODO
+ * @description: 下载任务
  */
 public class DownloadTask implements Runnable, Serializable {
 
@@ -17,9 +17,10 @@ public class DownloadTask implements Runnable, Serializable {
     private boolean begin=false;//判断何时开始
     private boolean exit=true;//判断何时退出
 
-    //不序列化ftpClient
+    // 不序列化ftpClient
     private transient FtpClient ftpClient;
 
+    // 文件大小
     private long fileSize;
 
     // 整个文件夹的下载大小
@@ -34,7 +35,6 @@ public class DownloadTask implements Runnable, Serializable {
     public DownloadTask() {
     }
 
-    //这个好像没用了，用下面那个构造函数，因为ftpclient不能序列化，要用set注入
     public DownloadTask(FtpFile ftpFile, FtpClient ftpClient, long alreadyDownSize, String curFilePath, long curDownSize, String localDir) throws Exception {
         this.ftpFile = ftpFile;
         this.ftpClient = new FtpClient(ftpClient);
@@ -124,10 +124,7 @@ public class DownloadTask implements Runnable, Serializable {
     public void downloadFile(String fileName,String localPath) throws Exception {
         ftpClient.dataConnect();
         long curSize=0;
-        boolean append=false;
         try{
-
-
             // 如果为下载中文件，则开始断点续传
             if(isBegin()) {
                 // 使用BINARY模式传送文件；
@@ -138,8 +135,7 @@ public class DownloadTask implements Runnable, Serializable {
                 if(!response.startsWith("350")){
                     throw new Exception("file "+fileName+" continue download fail!");
                 }
-                //???
-                //append=true;
+
                 setBegin(false);
                 setExit(false);
             }
@@ -148,23 +144,22 @@ public class DownloadTask implements Runnable, Serializable {
             if(!response.startsWith("150")){
                 throw new Exception("file "+fileName+" download fail!");
             }
-            //新建文件 TODO看后面考不考虑文件替换
+            //新建文件
             File file = new File(localPath + "\\" + fileName);
             if (!file.exists()) {
                 if (!file.createNewFile()) {
                     return;
                 }
             }
+            //这里要使用append方式不然断点下载会出错
             FileOutputStream fos = new FileOutputStream(file,true);
             BufferedOutputStream out = new BufferedOutputStream(fos);
             BufferedInputStream input = new BufferedInputStream(ftpClient.getDataSocket().getInputStream());
 
-//            if(append=true){
-//
-//            }
+
             byte[] b = new byte[1024];
             int bytesRead = 0;
-
+            //读操作以及更新进度
             while ((bytesRead = input.read(b, 0, b.length))!=-1&&!isExit()) {
                 out.write(b, 0, bytesRead);
                 curSize+=bytesRead;
@@ -185,7 +180,6 @@ public class DownloadTask implements Runnable, Serializable {
             setCurDownSize(curSize);
             setCurFilePath(ftpClient.getCurrentDir()+"/"+fileName);
             System.out.println("停止位置"+curFilePath);
-            //保存 filePath 和 curSize， 上面还要加filePath参数
         }
     }
 
@@ -212,7 +206,6 @@ public class DownloadTask implements Runnable, Serializable {
                 System.out.println("下载开始");
                 setBegin(true);
             }
-            System.out.println("???");
             if(isBegin()||!isExit()){
                 download(f,dirPath);
             }
@@ -242,10 +235,6 @@ public class DownloadTask implements Runnable, Serializable {
                 dir.mkdir();
             }
             download(ftpFile,localDir);
-            // 如果没有下载完，保存列表
-            if(getAlreadyDownSize()!=getFileSize()){
-                //TODO 保存列表
-            }
         }catch (Exception e){
             e.printStackTrace();
         }

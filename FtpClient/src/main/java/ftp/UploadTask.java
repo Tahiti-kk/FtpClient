@@ -9,9 +9,9 @@ import java.text.NumberFormat;
 /**
  * @author : Byron0648
  * @date : 2020-03-12 20:39
- * @description: TODO
+ * @description: 上传任务
  */
-//TODO 判断上传的文件是不是同一个
+
 public class UploadTask implements Runnable,Serializable {
 
     private File uploadFile;
@@ -45,7 +45,6 @@ public class UploadTask implements Runnable,Serializable {
     public UploadTask() {
     }
 
-    //这个函数可以不用了ftpClient用set注入，写参数的时候用下面的构造函数
     public UploadTask(FtpClient ftpClient, File file, long alreadyUpSize, String curFilePath, long curUpSize) throws Exception {
        fileSize = calcFileSize(file);
        this.alreadyUpSize = alreadyUpSize;
@@ -156,29 +155,7 @@ public class UploadTask implements Runnable,Serializable {
                     throw new Exception("not allowed to send the file" + file.getName());
                 }
             }
-
-//            DecimalFormat df = (DecimalFormat) NumberFormat.getInstance();
-//            // 可以设置精确几位小数
-//            df.setMaximumFractionDigits(2);
-//            //模式 例如四舍五入
-//            df.setRoundingMode(RoundingMode.HALF_UP);
-
-            // 新建线程，每隔0.5秒更新进度条
-//            new Thread() {
-//                @Override
-//                public void run() {
-//                    // 程序未退出并且未上传完成
-//                    while(!isExit()&&(alreadyUpSize!=fileSize)) {
-//                        try {
-//                            Thread.sleep(500);
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
-//                        System.out.println("进度百分比：" + df.format(1.0*alreadyUpSize/fileSize*100) + "%");
-//                    }
-//                }
-//            }.start();
-
+            //暂停的判断以及文件的读写
             while((bytesRead=input.read(buffer))!=-1&&!isExit()){//判断何时停止
                 output.write(buffer,0,bytesRead);
                 curSize+=bytesRead;
@@ -197,7 +174,6 @@ public class UploadTask implements Runnable,Serializable {
         if(isExit()){
             setCurUpSize(curSize);
             setCurFilePath(file.getAbsolutePath());
-            //保存 filePath 和 curSize， 上面还要加filePath参数
         }
         return file.length()==curSize;
     }
@@ -219,14 +195,10 @@ public class UploadTask implements Runnable,Serializable {
         ftpClient.cwd("..");
     }
 
-    //TODO
     @Override
     public void run(){
         try{
             upload(uploadFile);
-            if(getAlreadyUpSize()!=getFileSize()){
-                //TODO 保存列表
-            }
         }catch (Exception e){
             e.printStackTrace();
         }

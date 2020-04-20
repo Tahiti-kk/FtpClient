@@ -122,31 +122,6 @@ public class FtpClient{
         loggerMsg("connect successfully!", "info");
         setConnected(true);
         return response.startsWith("230");
-
-
-
-//        try{
-//            if(!sendCommand("USER " + username).startsWith("331")) {
-//                return false;
-//            }
-//            if(!sendCommand("PASS " + password).startsWith("230")) {
-//                return false;
-//            }
-//            // 如果已在连接状态，则重新连接
-//            if(getConnected()) {
-//                this.isConnected = false;
-//                loggerDisconnectedMsg();
-//            }
-//
-//            // 连接成功
-//            this.isConnected = true;
-//            loggerConnectedMsg();
-//
-//        } catch (IOException e) {
-//            loggerExceptionMsg(e.getMessage());
-//            return false;
-//        }
-//        return true;
     }
 
     /**
@@ -301,91 +276,6 @@ public class FtpClient{
         return list;
     }
 
-
-    /**
-     * 从服务器上下载文件
-     * @return InputStream, but return null if the file is not found
-     */
-//    public boolean downloadFile(String fileName,String localPath) throws Exception {
-//        dataConnect();
-//
-//        String response = sendCommand("RETR "+fileName);
-//        if(!response.startsWith("150")){
-//            loggerExceptionMsg("Exception: file "+fileName+" download fail!","info");
-//            throw new Exception("file "+fileName+" download fail!");
-//        }
-//
-//        byte[] b = new byte[1024];
-//        int len = -1;
-//        // Here we may overwrite existing file.
-//        File file = new File(localPath + "/" + fileName);
-//        if (!file.exists()) {// This file does not exist
-//            if (!file.createNewFile()) {// And create it unsuccessfully
-//                // means this file can't be downloaded here
-//                return false;
-//            }
-//        }
-//        FileOutputStream fos = new FileOutputStream(file);
-//        BufferedOutputStream out = new BufferedOutputStream(fos);
-//        BufferedInputStream input = new BufferedInputStream(dataSocket.getInputStream());
-//        while (-1 != (len = input.read(b, 0, b.length))) {
-//            out.write(b, 0, len);
-//        }
-//        out.flush();
-//        out.close();
-//        input.close();
-//        dataSocket.close();
-//        response = readLine();
-//        return response.startsWith("226");
-//    }
-
-//    public void downloadDir(FtpFile file,String localPath,String fileName) throws Exception{
-//        String dirPath = localPath+"/"+fileName;
-//        File dir = new File(dirPath);
-//        if(!dir.exists()){
-//            if(!dir.mkdir()){
-//                return;
-//            }
-//        }
-//        cwd(getCurrentDir()+"/"+file.getFileName());
-//        ArrayList<FtpFile> fileList = getAllFiles();
-//        for (FtpFile f:fileList){
-//            downloadFile(f.getFileName(),dirPath);
-//        }
-//    }
-
-//    public void download(FtpFile file,String localDir) throws Exception {
-//        if(file.isDirectory()){
-//            downloadDir(file,localDir,file.getFileName());
-//        }else{
-//            downloadFile(file.getFileName(),localDir);
-//        }
-//    }
-
-//    //TODO
-//    public InputStream downloadFile(FtpFile file){
-//        InputStream in = null;
-//        // file为文件夹
-//        if(file.getType() == 1) {
-//            return null;
-//        }
-//        // 被动模式
-//        Socket socket = passiveMode();
-//        if(socket == null) {
-//            loggerExceptionMsg("连接失败");
-//            return null;
-//        }
-//        try {
-//            String str = sendCommand("RETR " + file.getFilePath());
-//            if(str.startsWith("125") || str.startsWith("150") || str.startsWith("350")) {
-//                in = socket.getInputStream();
-//            }
-//        } catch (IOException e) {
-//            loggerExceptionMsg(e.getMessage());
-//            e.printStackTrace();
-//        }
-//        return in;
-//    }
 
     public String readLine() throws IOException {
         String line = reader.readLine();

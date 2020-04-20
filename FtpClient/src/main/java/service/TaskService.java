@@ -7,6 +7,7 @@ import ftp.UploadTask;
 import java.io.*;
 import java.util.ArrayList;
 
+//主要用于保存下载列表
 public class TaskService implements Serializable {
     private ArrayList<DownloadTask> downloadTaskList = new ArrayList<>();
     private ArrayList<UploadTask> uploadTaskList = new ArrayList<>();
@@ -28,7 +29,6 @@ public class TaskService implements Serializable {
     public void delDownloadTask(DownloadTask dt){
         System.out.println("删除下载任务");
         downloadTaskList.remove(dt);
-        //
     }
 
     public void startDownloadTask(DownloadTask dt){
