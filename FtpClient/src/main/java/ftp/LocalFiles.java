@@ -56,7 +56,68 @@ public class LocalFiles {
         return ( (new File(path)).getParent() );
     }
 
-    //删除文件夹
+    //删除文件或文件夹
+    public static boolean deleteFile(String path){
+        File file = new File(path);
+        if(file.exists()) {
+            if (file.isFile()) {
+                if (!file.delete()) {
+                    System.out.println("文件删除失败");
+                    return false;
+                }else{
+                    return true;
+                }
+            } else {
+                File[] files = file.listFiles();
+                if (files == null) {
+                    if (!file.delete()) {
+                        System.out.println("文件删除失败");
+                        return false;
+                    }else{
+                        return true;
+                    }
+                } else {
+                    for (int i = 0; i < files.length; i++) {
+                        if(!deleteFile(files[i].getAbsolutePath())){
+                            return false;
+                        }
+                    }
+                    if (!file.delete()) {
+                        System.out.println("文件删除失败");
+                        return false;
+                    }else{
+                        return true;
+                    }
+                }
+            }
+        } else{
+            return false;
+        }
+    }
 
+    //新建文件夹
+    public static boolean makeLocalDir(String path){
+        File file = new File(path);
+        if(!file.exists()){
+            if(!file.mkdir()){
+                System.out.println("文件夹创建失败");
+                return false;
+            }else{
+                return true;
+            }
+        }else{
+            return false;
+        }
+    }
 
+    //文件重命名
+    public static boolean rename(String oldPath,String newPath){
+        File oldFile = new File(oldPath);
+        File newFile = new File(newPath);
+        if(oldFile.exists() && !newFile.exists()){
+            return oldFile.renameTo(newFile);
+        }else{
+            return false;
+        }
+    }
 }

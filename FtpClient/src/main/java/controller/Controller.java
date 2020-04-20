@@ -141,7 +141,11 @@ public class Controller implements Initializable {
         }else {
             String path = LocalFiles.getParentPath(currentFilePath);
             fileList.setItems(FXCollections.observableArrayList(LocalFiles.getFiles(path)));
-            currentFilePath = path;
+            if(LocalFiles.isRoot(path)){
+                currentFilePath = path;
+            }else {
+                currentFilePath = path + "\\";
+            }
         }
         fx_localPath.setText(currentFilePath);
     }
@@ -220,6 +224,7 @@ public class Controller implements Initializable {
 
                         //向进程列表中添加进度条和暂停继续按钮
                         HBox hbox = new HBox();
+                        Label upFileName = new Label(currentFilePath + s);
                         ProgressBar progressBar = new ProgressBar();
                         progressBar.setPrefWidth(200);
                         Button button = new Button("暂停");
@@ -227,7 +232,7 @@ public class Controller implements Initializable {
                         button.setOnAction(new EventHandler<ActionEvent>() {
                             @Override
                             public void handle(ActionEvent actionEvent) {
-                                setUploadPasuseAction(button,uploadTask,progressBar);
+                                setUploadPasuseAction(button,uploadTask,progressBar,upFileName);
 //                                if(button.getText().equals("暂停")){
 //                                    button.setText("继续");
 //                                    taskService.stopUploadTask(uploadTask);
@@ -254,6 +259,7 @@ public class Controller implements Initializable {
                             }
                         });
                         hbox.getChildren().addAll(progressBar,button);
+                        fx_uploadVbox.getChildren().add(upFileName);
                         fx_uploadVbox.getChildren().add(hbox);
 
                         //更新进度条
@@ -265,6 +271,7 @@ public class Controller implements Initializable {
                                     System.out.println("进度：" + uploadTask.getAlreadyUpSize());
                                 }
                                 if(uploadTask.getAlreadyUpSize() >= uploadTask.getFileSize()){
+                                    updateProgress(1,1);
                                     refreshSeverList();
                                 }
                                 return null;
@@ -300,6 +307,7 @@ public class Controller implements Initializable {
 
                                 //向进程列表中添加进度条和暂停继续按钮
                                 HBox hbox = new HBox();
+                                Label downFileName = new Label(f.getFileName());
                                 ProgressBar progressBar = new ProgressBar();
                                 progressBar.setPrefWidth(200);
                                 Button button = new Button("暂停");
@@ -307,7 +315,7 @@ public class Controller implements Initializable {
                                 button.setOnAction(new EventHandler<ActionEvent>() {
                                     @Override
                                     public void handle(ActionEvent actionEvent) {
-                                        setDownloadPauseAction(button,downloadTask,progressBar);
+                                        setDownloadPauseAction(button,downloadTask,progressBar,downFileName);
 //                                        if(button.getText().equals("暂停")){
 //                                            button.setText("继续");
 //                                            taskService.stopDownloadTask(downloadTask);
@@ -334,6 +342,7 @@ public class Controller implements Initializable {
                                     }
                                 });
                                 hbox.getChildren().addAll(progressBar,button);
+                                fx_downloadVbox.getChildren().add(downFileName);
                                 fx_downloadVbox.getChildren().add(hbox);
 
                                 //创建进度显示的线程
@@ -351,7 +360,7 @@ public class Controller implements Initializable {
 //                                    }
 //                                });
 
-                                //javafx不允许非javafx主线程更改组件信息，下图为解决方法
+                                //javafx不允许非javafx主线程更改组件信息，以下为解决方法
                                 Task<Void> task = new Task<Void>() {
                                     @Override
                                     protected Void call() throws Exception {
@@ -360,6 +369,7 @@ public class Controller implements Initializable {
                                             updateProgress(downloadTask.getAlreadyDownSize(),downloadTask.getFileSize());
                                         }
                                         if(downloadTask.getAlreadyDownSize() >= downloadTask.getFileSize()){
+                                            updateProgress(1,1);
                                             refreshLocalList();
                                         }
                                         return null;
@@ -408,7 +418,7 @@ public class Controller implements Initializable {
     //服务器端新建文件夹
     public void sever_addDir(){
         Stage stage = new Stage();
-        Label l = new Label("输入新文件名称：");
+        Label l = new Label("输入文件夹名称：");
         TextField tx = new TextField();
         Button bt = new Button("确定");
         bt.setOnAction(new EventHandler<ActionEvent>() {
@@ -435,7 +445,7 @@ public class Controller implements Initializable {
 
     //服务器端重命名文件或文件夹
     public void sever_renameFile(){
-        if(severList.getSelectionModel().getSelectedItems().size() != 0 && ftpClient != null){
+        if(severList.getSelectionModel().getSelectedItems().size() == 1 && ftpClient != null){
             try {
                 ArrayList<FtpFile> ftpFiles = ftpClient.getAllFiles();
                 for(String s:severList.getSelectionModel().getSelectedItems()) {
@@ -476,7 +486,7 @@ public class Controller implements Initializable {
 
     //服务器端删除文件或者文件夹
     public void sever_deleteFile(){
-        if(severList.getSelectionModel().getSelectedItems().size() == 1 && ftpClient != null){
+        if(severList.getSelectionModel().getSelectedItems().size() > 0 && ftpClient != null){
             try {
                 ArrayList<FtpFile> ftpFiles = ftpClient.getAllFiles();
                 for(String s:severList.getSelectionModel().getSelectedItems()) {
@@ -494,9 +504,82 @@ public class Controller implements Initializable {
         }
     }
 
+    //本地新建文件夹
+    public void local_AddDir(){
+        Stage stage = new Stage();
+        Label l = new Label("输入文件夹名称：");
+        TextField tx = new TextField();
+        Button bt = new Button("确定");
+        bt.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                newFileName = tx.getText();
+                try {
+                    if(!LocalFiles.makeLocalDir(currentFilePath + newFileName)){
+                        showMessage("新建文件夹失败");
+                    }
+                    refreshLocalList();
+                    Stage stage = (Stage)bt.getScene().getWindow();
+                    stage.close();
+                }catch (Exception e){
+                    System.out.println(e.getMessage());
+                }
+                newFileName = "";
+            }
+        });
+        VBox vBox = new VBox(l,tx,bt);
+        Scene scene = new Scene(vBox, 200, 200);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    //删除本地文件
+    public void local_deleteFiles(){
+        if(fileList.getSelectionModel().getSelectedItems().size() > 0){
+            for(String s:fileList.getSelectionModel().getSelectedItems()) {
+                if(!LocalFiles.deleteFile(currentFilePath + s)){
+                    showMessage("文件删除失败");
+                }
+            }
+            refreshLocalList();
+        }
+    }
+
+    //重命名本地文件
+    public void local_renameFile(){
+        if(fileList.getSelectionModel().getSelectedItems().size() == 1 ) {
+                for (String s : fileList.getSelectionModel().getSelectedItems()) {
+                    Stage stage = new Stage();
+                    Label l = new Label("输入新文件名称：");
+                    TextField tx = new TextField(s);
+                    Button bt = new Button("确定");
+                    bt.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent event) {
+                            newFileName = tx.getText();
+                            try {
+                                if(!LocalFiles.rename(currentFilePath + s,currentFilePath + newFileName)){
+                                    showMessage("文件夹重命名失败");
+                                }
+                                refreshLocalList();
+                                Stage stage = (Stage) bt.getScene().getWindow();
+                                stage.close();
+                            } catch (Exception e) {
+                                System.out.println(e.getMessage());
+                            }
+                            newFileName = "";
+                        }
+                    });
+                    VBox vBox = new VBox(l, tx, bt);
+                    Scene scene = new Scene(vBox, 200, 200);
+                    stage.setScene(scene);
+                    stage.show();
+                }
+        }
+    }
 
     //刷新本地文件列表
-    private void refreshLocalList(){
+    public void refreshLocalList(){
         if(currentFilePath.equals("")){
             ObservableList<String> items = FXCollections.observableArrayList(LocalFiles.getRootFiles());
             fileList.setItems(items);
@@ -506,7 +589,7 @@ public class Controller implements Initializable {
     }
 
     //刷新服务器文件列表文件
-    private void refreshSeverList(){
+    public void refreshSeverList(){
         try {
             if(ftpClient != null) {
                 ArrayList<FtpFile> ftpFiles = ftpClient.getAllFiles();
@@ -520,7 +603,7 @@ public class Controller implements Initializable {
     }
 
     //设置下载暂停的的按键事件
-    private void setDownloadPauseAction(Button button,DownloadTask downloadTask,ProgressBar progressBar){
+    private void setDownloadPauseAction(Button button,DownloadTask downloadTask,ProgressBar progressBar,Label label){
         if(button.getText().equals("暂停")){
             button.setText("继续");
             taskService.stopDownloadTask(downloadTask);
@@ -533,22 +616,25 @@ public class Controller implements Initializable {
                     updateProgress(downloadTask.getAlreadyDownSize(),downloadTask.getFileSize());
                     while (downloadTask.getAlreadyDownSize() < downloadTask.getFileSize() && !downloadTask.isExit()) {
                         updateProgress(downloadTask.getAlreadyDownSize(),downloadTask.getFileSize());
+                        updateMessage(downloadTask.getCurFilePath());
                         System.out.println("进度：" + downloadTask.getAlreadyDownSize());
                     }
                     if(downloadTask.getAlreadyDownSize() >= downloadTask.getFileSize()){
+                        updateProgress(1,1);
                         refreshLocalList();
                     }
                     return null;
                 }
             };
             progressBar.progressProperty().bind(task.progressProperty());
+            label.textProperty().bind(task.messageProperty());
             Thread t = new Thread(task);
             t.start();
         }
     }
 
     //设置上传暂停的按键事件
-    private void setUploadPasuseAction(Button button,UploadTask uploadTask,ProgressBar progressBar){
+    private void setUploadPasuseAction(Button button,UploadTask uploadTask,ProgressBar progressBar,Label label){
         if(button.getText().equals("暂停")){
             button.setText("继续");
             taskService.stopUploadTask(uploadTask);
@@ -562,14 +648,17 @@ public class Controller implements Initializable {
                     while (uploadTask.getAlreadyUpSize() < uploadTask.getFileSize() && !uploadTask.isExit()) {
                         System.out.println("进度：" + uploadTask.getAlreadyUpSize());
                         updateProgress(uploadTask.getAlreadyUpSize(),uploadTask.getFileSize());
+                        updateMessage(uploadTask.getCurFilePath());
                     }
                     if (uploadTask.getAlreadyUpSize() >= uploadTask.getFileSize()) {
+                        updateProgress(1,1);
                         refreshLocalList();
                     }
                     return null;
                 }
             };
             progressBar.progressProperty().bind(task.progressProperty());
+            label.textProperty().bind(task.messageProperty());
             Thread t = new Thread(task);
             t.start();
         }
@@ -580,6 +669,7 @@ public class Controller implements Initializable {
         if(taskService.getDownloadTaskList().size() > 0){
             for(DownloadTask dt:taskService.getDownloadTaskList()){
                 HBox hbox = new HBox();
+                Label downFileName = new Label(dt.getCurFilePath());
                 ProgressBar progressBar = new ProgressBar();
                 progressBar.setPrefWidth(200);
                 progressBar.setProgress(((double)(dt.getAlreadyDownSize()))/dt.getFileSize());
@@ -588,17 +678,18 @@ public class Controller implements Initializable {
                 button.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent actionEvent) {
-                        setDownloadPauseAction(button,dt, progressBar);
+                        setDownloadPauseAction(button,dt, progressBar,downFileName);
                     }
                 });
                 hbox.getChildren().addAll(progressBar,button);
-                fx_downloadVbox.getChildren().add(hbox);
+                fx_downloadVbox.getChildren().addAll(downFileName,hbox);
             }
         }
         if(taskService.getUploadTaskList().size() > 0){
             for(UploadTask ut:taskService.getUploadTaskList()){
                 //向进程列表中添加进度条和暂停继续按钮
                 HBox hbox = new HBox();
+                Label upFileName = new Label(ut.getCurFilePath());
                 ProgressBar progressBar = new ProgressBar();
                 progressBar.setPrefWidth(200);
                 progressBar.setProgress(((double)(ut.getAlreadyUpSize()))/ut.getFileSize());
@@ -607,11 +698,11 @@ public class Controller implements Initializable {
                 button.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent actionEvent) {
-                        setUploadPasuseAction(button,ut,progressBar);
+                        setUploadPasuseAction(button,ut,progressBar,upFileName);
                     }
                 });
                 hbox.getChildren().addAll(progressBar,button);
-                fx_uploadVbox.getChildren().add(hbox);
+                fx_uploadVbox.getChildren().addAll(upFileName,hbox);
             }
         }
     }
@@ -623,5 +714,14 @@ public class Controller implements Initializable {
             ftpFilesName.add(f.getFileName());
         }
         return ftpFilesName;
+    }
+
+    //新建弹窗显示信息
+    public void showMessage(String s) {
+        Stage stage = new Stage();
+        Label l = new Label(s);
+        Scene scene = new Scene(l,200,100);
+        stage.setScene(scene);
+        stage.show();
     }
 }

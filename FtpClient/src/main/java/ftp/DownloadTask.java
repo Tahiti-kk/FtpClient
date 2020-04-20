@@ -98,6 +98,8 @@ public class DownloadTask implements Runnable, Serializable {
 
     public long getCurDownSize(){ return curDownSize;}
 
+    public String getCurFilePath(){return curFilePath;}
+
     //设置FtpClient
     public void setFtpClient(FtpClient ftpClient) throws Exception {
         this.ftpClient = new FtpClient(ftpClient);

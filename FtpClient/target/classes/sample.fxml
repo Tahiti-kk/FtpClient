@@ -82,9 +82,10 @@
                                  <contextMenu>
                                     <ContextMenu>
                                       <items>
-                                        <MenuItem mnemonicParsing="false" text="新建文件夹" />
-                                          <MenuItem mnemonicParsing="false" text="重命名" />
-                                          <MenuItem mnemonicParsing="false" text="删除" />
+                                        <MenuItem mnemonicParsing="false" onAction="#local_AddDir" text="新建文件夹" />
+                                          <MenuItem mnemonicParsing="false" onAction="#local_renameFile" text="重命名" />
+                                          <MenuItem mnemonicParsing="false" onAction="#local_deleteFiles" text="删除" />
+                                          <MenuItem mnemonicParsing="false" onAction="#refreshLocalList" text="刷新" />
                                       </items>
                                     </ContextMenu>
                                  </contextMenu>
@@ -107,6 +108,7 @@
                                         <MenuItem mnemonicParsing="false" onAction="#sever_addDir" text="新建文件夹" />
                                           <MenuItem mnemonicParsing="false" onAction="#sever_renameFile" text="重命名" />
                                           <MenuItem mnemonicParsing="false" onAction="#sever_deleteFile" text="删除" />
+                                          <MenuItem mnemonicParsing="false" onAction="#refreshSeverList" text="刷新" />
                                       </items>
                                     </ContextMenu>
                                  </contextMenu>
