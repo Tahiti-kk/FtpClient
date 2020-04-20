@@ -133,6 +133,7 @@ public class UploadTask implements Runnable,Serializable {
     //上传一个文件
     public boolean uploadFile(InputStream inputStream,File file) throws Exception {
         ftpClient.dataConnect();
+        setCurFilePath(file.getAbsolutePath());
         long curSize=0;
         try{
             BufferedInputStream input = new BufferedInputStream(inputStream);
@@ -173,7 +174,6 @@ public class UploadTask implements Runnable,Serializable {
         //如果在这停止 保存当前文件路径 和已下载字节数
         if(isExit()){
             setCurUpSize(curSize);
-            setCurFilePath(file.getAbsolutePath());
         }
         return file.length()==curSize;
     }

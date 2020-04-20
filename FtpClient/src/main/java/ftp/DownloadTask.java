@@ -123,6 +123,7 @@ public class DownloadTask implements Runnable, Serializable {
     //下载单个文件
     public void downloadFile(String fileName,String localPath) throws Exception {
         ftpClient.dataConnect();
+        setCurFilePath(ftpClient.getCurrentDir()+"/"+fileName);
         long curSize=0;
         try{
             // 如果为下载中文件，则开始断点续传
@@ -178,7 +179,6 @@ public class DownloadTask implements Runnable, Serializable {
         //如果在这停止 保存当前文件路径 和已下载字节数
         if(isExit()){
             setCurDownSize(curSize);
-            setCurFilePath(ftpClient.getCurrentDir()+"/"+fileName);
             System.out.println("停止位置"+curFilePath);
         }
     }
