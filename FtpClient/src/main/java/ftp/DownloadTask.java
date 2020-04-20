@@ -124,7 +124,10 @@ public class DownloadTask implements Runnable, Serializable {
     public void downloadFile(String fileName,String localPath) throws Exception {
         ftpClient.dataConnect();
         long curSize=0;
+        boolean append=false;
         try{
+
+
             // 如果为下载中文件，则开始断点续传
             if(isBegin()) {
                 // 使用BINARY模式传送文件；
@@ -135,6 +138,8 @@ public class DownloadTask implements Runnable, Serializable {
                 if(!response.startsWith("350")){
                     throw new Exception("file "+fileName+" continue download fail!");
                 }
+                //???
+                //append=true;
                 setBegin(false);
                 setExit(false);
             }
@@ -150,10 +155,13 @@ public class DownloadTask implements Runnable, Serializable {
                     return;
                 }
             }
-            FileOutputStream fos = new FileOutputStream(file);
+            FileOutputStream fos = new FileOutputStream(file,true);
             BufferedOutputStream out = new BufferedOutputStream(fos);
             BufferedInputStream input = new BufferedInputStream(ftpClient.getDataSocket().getInputStream());
 
+//            if(append=true){
+//
+//            }
             byte[] b = new byte[1024];
             int bytesRead = 0;
 
@@ -175,7 +183,8 @@ public class DownloadTask implements Runnable, Serializable {
         //如果在这停止 保存当前文件路径 和已下载字节数
         if(isExit()){
             setCurDownSize(curSize);
-            setCurFilePath(ftpClient.getCurrentDir()+"\\"+fileName);
+            setCurFilePath(ftpClient.getCurrentDir()+"/"+fileName);
+            System.out.println("停止位置"+curFilePath);
             //保存 filePath 和 curSize， 上面还要加filePath参数
         }
     }
@@ -183,7 +192,7 @@ public class DownloadTask implements Runnable, Serializable {
     // 下载文件夹
     public void downloadDir(FtpFile file,String localPath) throws Exception{
         String dirPath = localPath+"\\"+file.getFileName();
-        System.out.println(dirPath);
+        System.out.println("下载文件夹到："+dirPath);
         File dir = new File(dirPath);
         //新建文件夹
         if(!dir.exists()){
@@ -195,14 +204,20 @@ public class DownloadTask implements Runnable, Serializable {
         ftpClient.cwd(ftpClient.getCurrentDir()+"/"+file.getFileName());
         ArrayList<FtpFile> fileList = ftpClient.getAllFiles();
         for (FtpFile f:fileList){
-            //找起始点
-            if(ftpClient.getCurrentDir()+"\\"+f.getFileName()==curFilePath){
+            //找起始点 ---
+            String path = ftpClient.getCurrentDir()+"/"+f.getFileName();
+            System.out.println("ftp path="+path);
+            System.out.println("当前路径"+curFilePath);
+            if((ftpClient.getCurrentDir()+"/"+f.getFileName()).equals(curFilePath)){
+                System.out.println("下载开始");
                 setBegin(true);
             }
+            System.out.println("???");
             if(isBegin()||!isExit()){
                 download(f,dirPath);
             }
         }
+        ftpClient.cwd("..");
     }
 
     //下载函数，localDir为目标地址
@@ -210,7 +225,7 @@ public class DownloadTask implements Runnable, Serializable {
         if(file.isDirectory()){
             downloadDir(file,localDir);
         }else{
-            if((ftpClient.getCurrentDir()+"\\"+file.getFileName()).equals(curFilePath)){
+            if((ftpClient.getCurrentDir()+"/"+file.getFileName()).equals(curFilePath)){
                 setBegin(true);
             }
             if(!isExit()||begin) {

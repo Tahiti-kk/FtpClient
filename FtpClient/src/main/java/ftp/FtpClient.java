@@ -284,6 +284,7 @@ public class FtpClient{
 
             String line = bReader.readLine();
             while (line != null) {
+                System.out.println(line);
                 loggerMsg(line, "cmd");
                 FtpFile file = parseFile(line, this.currentDir);
                 list.add(file);
