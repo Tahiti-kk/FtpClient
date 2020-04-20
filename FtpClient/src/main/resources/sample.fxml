@@ -19,7 +19,7 @@
                   <Insets left="5.0" />
                </HBox.margin>
             </Label>
-            <TextField id="ip" fx:id="fxIP" prefHeight="36.0" prefWidth="200.0" text="116.62.170.221" HBox.hgrow="ALWAYS">
+            <TextField id="ip" fx:id="fxIP" prefHeight="36.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
                <HBox.margin>
                   <Insets right="10.0" />
                </HBox.margin></TextField>
@@ -28,7 +28,7 @@
                   <Font size="16.0" />
                </font>
             </Label>
-            <TextField id="port" fx:id="fxPort" prefHeight="36.0" prefWidth="200.0" text="21" HBox.hgrow="ALWAYS">
+            <TextField id="port" fx:id="fxPort" prefHeight="36.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
                <HBox.margin>
                   <Insets right="10.0" />
                </HBox.margin>
@@ -38,7 +38,7 @@
                   <Font size="16.0" />
                </font>
             </Label>
-            <TextField id="account" fx:id="fxAccount" prefHeight="36.0" prefWidth="200.0" text="ftp511" HBox.hgrow="ALWAYS">
+            <TextField id="account" fx:id="fxAccount" prefHeight="36.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
                <HBox.margin>
                   <Insets right="10.0" />
                </HBox.margin>
@@ -48,7 +48,7 @@
                   <Font size="16.0" />
                </font>
             </Label>
-            <TextField id="password" fx:id="fxPassword" prefHeight="36.0" prefWidth="200.0" text="admin123456" HBox.hgrow="ALWAYS">
+            <TextField id="password" fx:id="fxPassword" prefHeight="36.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
                <HBox.margin>
                   <Insets right="10.0" />
                </HBox.margin>

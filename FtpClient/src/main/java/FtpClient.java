@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import service.TaskService;
@@ -42,6 +43,7 @@ public class FtpClient extends Application{
             }
         });
 
+        primaryStage.getIcons().add(new Image("file:FTP.png"));
         primaryStage.show();
     }
 

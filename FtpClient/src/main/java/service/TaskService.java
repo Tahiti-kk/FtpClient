@@ -7,17 +7,10 @@ import ftp.UploadTask;
 import java.io.*;
 import java.util.ArrayList;
 
+//主要用于保存下载列表
 public class TaskService implements Serializable {
     private ArrayList<DownloadTask> downloadTaskList = new ArrayList<>();
     private ArrayList<UploadTask> uploadTaskList = new ArrayList<>();
-
-    public ArrayList<DownloadTask> getDownloadTaskList() {
-        return downloadTaskList;
-    }
-
-    public ArrayList<UploadTask> getUploadTaskList() {
-        return uploadTaskList;
-    }
 
     public TaskService() {
     }
@@ -25,6 +18,14 @@ public class TaskService implements Serializable {
     public TaskService(ArrayList<DownloadTask> downloadTaskList, ArrayList<UploadTask> uploadTaskList) {
         this.downloadTaskList = downloadTaskList;
         this.uploadTaskList = uploadTaskList;
+    }
+
+    public ArrayList<DownloadTask> getDownloadTaskList() {
+        return downloadTaskList;
+    }
+
+    public ArrayList<UploadTask> getUploadTaskList() {
+        return uploadTaskList;
     }
 
     public void addDownloadTask(DownloadTask dt) throws Exception {
@@ -36,10 +37,10 @@ public class TaskService implements Serializable {
     public void delDownloadTask(DownloadTask dt){
         System.out.println("删除下载任务");
         downloadTaskList.remove(dt);
-        //
     }
 
     public void startDownloadTask(DownloadTask dt){
+        dt.setExit(false);
         System.out.println("开始下载任务");
         Thread t = new Thread(dt);
         t.start();

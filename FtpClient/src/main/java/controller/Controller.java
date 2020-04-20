@@ -10,6 +10,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 
@@ -21,6 +22,7 @@ import java.util.ResourceBundle;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import service.TaskService;
 import util.CmdListener;
@@ -89,7 +91,7 @@ public class Controller implements Initializable {
     }
 
     public String getFtpClientIp(){
-        return ftpClient.gethost();
+        return ftpClient.getHost();
     }
 
     //界面展现初始化
@@ -107,7 +109,7 @@ public class Controller implements Initializable {
                 currentFilePath = fileList.getSelectionModel().getSelectedItem();
                 fileList.setItems(FXCollections.observableArrayList(LocalFiles.getFiles(currentFilePath)));
             }
-            else if(LocalFiles.isFileDirectory(currentFilePath)){
+            else if(LocalFiles.isFileDirectory(currentFilePath + fileList.getSelectionModel().getSelectedItem())){
                 currentFilePath += fileList.getSelectionModel().getSelectedItem();
                 currentFilePath += "\\";
                 fileList.setItems(FXCollections.observableArrayList(LocalFiles.getFiles(currentFilePath)));
@@ -228,7 +230,7 @@ public class Controller implements Initializable {
             fx_btnConnect.setText("连接");
             try {
                 if(taskService.getDownloadTaskList().size() > 0 || taskService.getUploadTaskList().size() > 0) {
-                    String fileName = ftpClient.gethost() + ".dat";
+                    String fileName = ftpClient.getHost() + ".dat";
                     TaskService.SerializeTaskService(taskService, fileName);
                 }
                 ftpClient.quit();
@@ -257,9 +259,13 @@ public class Controller implements Initializable {
                         HBox hbox = new HBox();
                         Label upFileNameLab = new Label(currentFilePath + s);
                         ProgressBar progressBar = new ProgressBar();
-                        progressBar.setPrefWidth(200);
+                        progressBar.setPrefWidth(800);
                         Button pauseButton = new Button("暂停");
                         Button cancelButton = new Button("取消");
+                        pauseButton.setFont(new Font(10));
+                        pauseButton.setPrefWidth(50);
+                        cancelButton.setFont(new Font(10));
+                        cancelButton.setPrefWidth(50);
                         //为pauseButton添加匿名按键事件
                         pauseButton.setOnAction(new EventHandler<ActionEvent>() {
                             @Override
@@ -364,9 +370,14 @@ public class Controller implements Initializable {
                                 HBox hbox = new HBox();
                                 Label downFileNameLab = new Label(f.getFileName());
                                 ProgressBar progressBar = new ProgressBar();
-                                progressBar.setPrefWidth(200);
+                                progressBar.setPrefWidth(800);
                                 Button pauseButton = new Button("暂停");
+
                                 Button cancelButton = new Button("取消");
+                                pauseButton.setFont(new Font(10));
+                                pauseButton.setPrefWidth(50);
+                                cancelButton.setFont(new Font(10));
+                                cancelButton.setPrefWidth(50);
                                 //为pauseButton添加匿名按键事件
                                 pauseButton.setOnAction(new EventHandler<ActionEvent>() {
                                     @Override
@@ -706,7 +717,7 @@ public class Controller implements Initializable {
                 @Override
                 public void changed(ObservableValue<? extends Number> observableValue, Number number, Number newValue) {
                     if(newValue.doubleValue() == 1){
-                        fx_upOkList.getItems().add(downloadTask.getDownFileName());
+                        fx_downOkList.getItems().add(downloadTask.getDownFileName());
                         fx_downloadVbox.getChildren().remove(hBox);
                         fx_downloadVbox.getChildren().remove(label);
                         refreshLocalList();
@@ -721,7 +732,7 @@ public class Controller implements Initializable {
     }
 
     //设置上传暂停的按键事件
-    private void setUploadPasuseAction(Button button,UploadTask uploadTask,ProgressBar progressBar,Label label,HBox hBox){
+    private void setUploadPasuseAction(Button button, UploadTask uploadTask, ProgressBar progressBar, Label label, HBox hBox){
         if(button.getText().equals("暂停")){
             button.setText("继续");
             taskService.stopUploadTask(uploadTask);
@@ -768,10 +779,14 @@ public class Controller implements Initializable {
                 HBox hbox = new HBox();
                 Label downFileNameLab = new Label(dt.getCurFilePath());
                 ProgressBar progressBar = new ProgressBar();
-                progressBar.setPrefWidth(200);
+                progressBar.setPrefWidth(800);
                 progressBar.setProgress(((double)(dt.getAlreadyDownSize()))/dt.getFileSize());
                 Button pauseButton = new Button("继续");
                 Button cancelButton = new Button("取消");
+                pauseButton.setFont(new Font(10));
+                pauseButton.setPrefWidth(50);
+                cancelButton.setFont(new Font(10));
+                cancelButton.setPrefWidth(50);
                 //为button添加匿名按键事件
                 cancelButton.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
@@ -799,10 +814,14 @@ public class Controller implements Initializable {
                 HBox hbox = new HBox();
                 Label upFileNameLab = new Label(ut.getCurFilePath());
                 ProgressBar progressBar = new ProgressBar();
-                progressBar.setPrefWidth(200);
+                progressBar.setPrefWidth(800);
                 progressBar.setProgress(((double)(ut.getAlreadyUpSize()))/ut.getFileSize());
                 Button cancelButton = new Button("取消");
                 Button pauseButton = new Button("继续");
+                pauseButton.setFont(new Font(10));
+                pauseButton.setPrefWidth(50);
+                cancelButton.setFont(new Font(10));
+                cancelButton.setPrefWidth(50);
                 //为button添加匿名按键事件
                 cancelButton.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
