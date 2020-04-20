@@ -53,7 +53,7 @@
                   <Insets right="10.0" />
                </HBox.margin>
             </TextField>
-            <Button mnemonicParsing="false" onMouseClicked="#Connect_Btn_Click" prefHeight="36.0" prefWidth="80.0" text="连接">
+            <Button fx:id="fx_btnConnect" mnemonicParsing="false" onMouseClicked="#Connect_Btn_Click" prefHeight="36.0" prefWidth="80.0" text="连接">
                <HBox.margin>
                   <Insets left="10.0" />
                </HBox.margin></Button>

@@ -43,6 +43,8 @@ public class Controller implements Initializable {
     private TextField fxAccount;
     @FXML
     private TextField fxPassword;
+    @FXML
+    private Button fx_btnConnect;
 
     @FXML
     private Label fx_localPath;
@@ -152,59 +154,16 @@ public class Controller implements Initializable {
 
     //服务器文件back按键点击事件
     public void sever_Back(MouseEvent event){
-        try {
-            ftpClient.cwd("..");
-            ArrayList<String> ftpFileNames = getFtpFileNames(ftpClient.getAllFiles());
-            ObservableList<String> items = FXCollections.observableArrayList(ftpFileNames);
-            severList.setItems(items);
-            fx_severPath.setText(ftpClient.getCurrentDir());
-        }catch (Exception ex){
-            Stage stage = new Stage();
-            Label l = new Label(ex.getMessage());
-            Scene s = new Scene(l,200,100);
-            stage.setScene(s);
-            stage.show();
-        }
-    }
-
-    //连接按钮
-    public void Connect_Btn_Click(MouseEvent event)throws Exception {
-        String ip = fxIP.getText();
-        String port = fxPort.getText();
-        String account = fxAccount.getText();
-        String password = fxPassword.getText();
-        if (ip.equals("") || port.equals("") || account.equals("") || password.equals("")) {
-            Stage stage = new Stage();
-            Label l = new Label("请输入完整信息");
-            Scene s = new Scene(l, 200, 100);
-            stage.setScene(s);
-            stage.show();
-        } else {
+        if(ftpClient != null) {
             try {
-                ftpClient = new FtpClient(ip, Integer.parseInt(port), account, password);
-                String fileName = ip + ".dat";
-                File file = new File(fileName);
-                if(file.exists()){
-                    taskService = TaskService.DeSerializeTaskService(fileName);
-                    createProcess();
-                }
-                taskService.setFtpClientInTasks(ftpClient);
-
-                // 添加日志信息接口
-                CmdListener cmdListener = new CmdListener(fx_cmdText);
-                InfoListener infoListener = new InfoListener(fx_infoText);
-                ftpClient.addListener(cmdListener);
-                ftpClient.addListener(infoListener);
-
-                ftpClient.login();
-                fx_severPath.setText(ftpClient.getCurrentDir());
-                ArrayList<FtpFile> ftpFiles = ftpClient.getAllFiles();
-                ArrayList<String> ftpFilesName = getFtpFileNames(ftpFiles);
-                ObservableList<String> items = FXCollections.observableArrayList(ftpFilesName);
+                ftpClient.cwd("..");
+                ArrayList<String> ftpFileNames = getFtpFileNames(ftpClient.getAllFiles());
+                ObservableList<String> items = FXCollections.observableArrayList(ftpFileNames);
                 severList.setItems(items);
+                fx_severPath.setText(ftpClient.getCurrentDir());
             } catch (Exception ex) {
                 Stage stage = new Stage();
-                Label l = new Label("连接出现问题！" + ex.getMessage());
+                Label l = new Label(ex.getMessage());
                 Scene s = new Scene(l, 200, 100);
                 stage.setScene(s);
                 stage.show();
@@ -212,8 +171,72 @@ public class Controller implements Initializable {
         }
     }
 
+    //连接
+    public void Connect_Btn_Click(MouseEvent event)throws Exception {
+        if(fx_btnConnect.getText().equals("连接")) {
+            String ip = fxIP.getText();
+            String port = fxPort.getText();
+            String account = fxAccount.getText();
+            String password = fxPassword.getText();
+            if (ip.equals("") || port.equals("") || account.equals("") || password.equals("")) {
+                Stage stage = new Stage();
+                Label l = new Label("请输入完整信息");
+                Scene s = new Scene(l, 200, 100);
+                stage.setScene(s);
+                stage.show();
+            } else {
+                try {
+                    ftpClient = new FtpClient(ip, Integer.parseInt(port), account, password);
+                    String fileName = ip + ".dat";
+                    File file = new File(fileName);
+                    if (file.exists()) {
+                        taskService = TaskService.DeSerializeTaskService(fileName);
+                        createProcess();
+                    }
+                    taskService.setFtpClientInTasks(ftpClient);
+
+                    // 添加日志信息接口
+                    CmdListener cmdListener = new CmdListener(fx_cmdText);
+                    InfoListener infoListener = new InfoListener(fx_infoText);
+                    ftpClient.addListener(cmdListener);
+                    ftpClient.addListener(infoListener);
+
+                    ftpClient.login();
+                    fx_severPath.setText(ftpClient.getCurrentDir());
+                    ArrayList<FtpFile> ftpFiles = ftpClient.getAllFiles();
+                    ArrayList<String> ftpFilesName = getFtpFileNames(ftpFiles);
+                    ObservableList<String> items = FXCollections.observableArrayList(ftpFilesName);
+                    severList.setItems(items);
+                    fx_btnConnect.setText("断开连接");
+                } catch (Exception ex) {
+                    Stage stage = new Stage();
+                    Label l = new Label("连接出现问题！" + ex.getMessage());
+                    Scene s = new Scene(l, 200, 100);
+                    stage.setScene(s);
+                    stage.show();
+                }
+            }
+        }else if(fx_btnConnect.getText().equals("断开连接")){
+            fx_btnConnect.setText("连接");
+            try {
+                if(taskService.getDownloadTaskList().size() > 0 || taskService.getUploadTaskList().size() > 0) {
+                    String fileName = ftpClient.gethost() + ".dat";
+                    TaskService.SerializeTaskService(taskService, fileName);
+                }
+                ftpClient.quit();
+                severList.setItems(null);
+                ftpClient = null;
+            }catch (Exception e){
+                System.out.println(e);
+            }
+        }
+    }
+
     //上传文件
     public void upload(){
+        if(ftpClient == null){
+            return;
+        }
         if(fileList.getSelectionModel().getSelectedItems().size() != 0){
             try {
                 for (String s : fileList.getSelectionModel().getSelectedItems()) {
@@ -291,6 +314,9 @@ public class Controller implements Initializable {
 
     //下载文件
     public void download(){
+        if(ftpClient == null){
+            return;
+        }
         if(currentFilePath.equals("")){
             System.out.println("无法下载到磁盘目录下");
             return;
@@ -403,17 +429,17 @@ public class Controller implements Initializable {
         fx_infoText.setVisible(true);
     }
 
-    //切换文件列表
-    public void Click_fileHbox(MouseEvent me){
-        fx_progressAcc.setVisible(false);
-        fx_fileHbox.setVisible(true);
-    }
-
-    //切换进程显示
-    public void Click_processVbox(MouseEvent me){
-        fx_fileHbox.setVisible(false);
-        fx_progressAcc.setVisible(true);
-    }
+//    //切换文件列表
+//    public void Click_fileHbox(MouseEvent me){
+//        fx_progressAcc.setVisible(false);
+//        fx_fileHbox.setVisible(true);
+//    }
+//
+//    //切换进程显示
+//    public void Click_processVbox(MouseEvent me){
+//        fx_fileHbox.setVisible(false);
+//        fx_progressAcc.setVisible(true);
+//    }
 
     //服务器端新建文件夹
     public void sever_addDir(){
