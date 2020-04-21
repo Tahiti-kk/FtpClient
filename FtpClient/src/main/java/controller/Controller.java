@@ -10,7 +10,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 
@@ -29,6 +28,11 @@ import util.CmdListener;
 import util.InfoListener;
 
 
+/**
+ * @author : 洪涛、李彩彬
+ * @date : 2020-03-16 13:53
+ * @description: 界面控制器
+ */
 public class Controller implements Initializable {
 
     private String currentFilePath = "";
@@ -201,7 +205,7 @@ public class Controller implements Initializable {
                     File file = new File(fileName);
                     if (file.exists()) {
                         taskService = TaskService.DeSerializeTaskService(fileName);
-                        createProcess();
+                        createProgress();
                     }
                     taskService.setFtpClientInTasks(ftpClient);
 
@@ -261,9 +265,9 @@ public class Controller implements Initializable {
                         ProgressBar progressBar = new ProgressBar();
                         progressBar.setPrefWidth(800);
                         Button pauseButton = new Button("暂停");
-                        Button cancelButton = new Button("取消");
                         pauseButton.setFont(new Font(10));
                         pauseButton.setPrefWidth(50);
+                        Button cancelButton = new Button("取消");
                         cancelButton.setFont(new Font(10));
                         cancelButton.setPrefWidth(50);
                         //为pauseButton添加匿名按键事件
@@ -773,7 +777,7 @@ public class Controller implements Initializable {
     }
 
     //为上次未完成的进度创建进度条
-    private void createProcess(){
+    private void createProgress(){
         if(taskService.getDownloadTaskList().size() > 0){
             for(DownloadTask dt:taskService.getDownloadTaskList()){
                 HBox hbox = new HBox();
