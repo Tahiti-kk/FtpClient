@@ -1,5 +1,8 @@
 package ftp;
-
+/**
+ * 戢启瑞：上传命令的实现，实现文件、文件夹的上传、上传的起止以及上传进度的获取
+ * 李军邑：补充断点续传的功能
+ */
 import java.io.*;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;

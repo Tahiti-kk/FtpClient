@@ -1,3 +1,5 @@
+package test;
+
 import ftp.FtpClient;
 import ftp.UploadTask;
 import javafx.scene.control.TextArea;

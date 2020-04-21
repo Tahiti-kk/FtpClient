@@ -1,4 +1,8 @@
 package ftp;
+/**
+ * 戢启瑞：下载命令的实现，实现文件、文件夹的下载、下载的起止以及下载进度的获取
+ * 李军邑：补充断点续下载的功能
+ */
 
 import java.io.*;
 import java.util.ArrayList;

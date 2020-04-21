@@ -1,3 +1,8 @@
+/**
+ * 李军邑：logger接口的实现，login命令的实现，SendCommand的实现
+ * 戢启瑞：其他的具体的FTP命令的实现
+ */
+
 package ftp;
 
 

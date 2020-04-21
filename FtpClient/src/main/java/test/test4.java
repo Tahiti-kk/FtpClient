@@ -1,3 +1,5 @@
+package test;
+
 import ftp.DownloadTask;
 import ftp.FtpClient;
 import ftp.FtpFile;

@@ -1,5 +1,7 @@
 package ftp;
-
+/**
+ * 李军邑：实现
+ */
 import util.Constant;
 
 import java.io.Serializable;
