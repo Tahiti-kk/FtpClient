@@ -4,6 +4,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author : 洪涛
+ * @date : 2020-03-16 13:53
+ * @description: 本地文件操作
+ */
 public class LocalFiles {
     //获得本地所有磁盘目录
     public static List<String> getRootFiles(){

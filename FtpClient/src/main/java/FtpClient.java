@@ -1,4 +1,6 @@
 import controller.Controller;
+import ftp.DownloadTask;
+import ftp.UploadTask;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -33,6 +35,16 @@ public class FtpClient extends Application{
                 try {
                     TaskService taskService = controller.getTaskService();
                     if(taskService.getDownloadTaskList().size() > 0 || taskService.getUploadTaskList().size() > 0) {
+                        if(taskService.getDownloadTaskList().size() > 0){
+                            for(DownloadTask dt:taskService.getDownloadTaskList()){
+                                dt.pauseDownload();
+                            }
+                        }
+                        if(taskService.getUploadTaskList().size() > 0){
+                            for(UploadTask ut:taskService.getUploadTaskList()){
+                                ut.pauseUpload();
+                            }
+                        }
                         String fileName = controller.getFtpClientIp() + ".dat";
                         TaskService.SerializeTaskService(taskService, fileName);
                     }
