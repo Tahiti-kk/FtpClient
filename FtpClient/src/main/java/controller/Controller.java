@@ -324,6 +324,7 @@ public class Controller implements Initializable {
                                 }
                                 if(uploadTask.getAlreadyUpSize() >= uploadTask.getFileSize()){
                                     updateProgress(1,1);
+                                    taskService.delUploadTask(uploadTask);
                                 }
                                 return null;
                             }
@@ -451,7 +452,7 @@ public class Controller implements Initializable {
                                         }
                                         if(downloadTask.getAlreadyDownSize() >= downloadTask.getFileSize()){
                                             updateProgress(1,1);
-                                            refreshLocalList();
+                                            taskService.delDownloadTask(downloadTask);
                                         }
                                         return null;
                                     }
@@ -461,7 +462,7 @@ public class Controller implements Initializable {
                                     public void changed(ObservableValue<? extends Number> observableValue, Number number, Number newValue) {
                                         if(newValue.doubleValue() == 1){
                                             refreshLocalList();
-                                            fx_upOkList.getItems().add(downloadTask.getDownFileName());
+                                            fx_downOkList.getItems().add(downloadTask.getDownFileName());
                                             fx_downloadVbox.getChildren().remove(hbox);
                                             fx_downloadVbox.getChildren().remove(downFileNameLab);
 
@@ -713,6 +714,7 @@ public class Controller implements Initializable {
                     }
                     if(downloadTask.getAlreadyDownSize() >= downloadTask.getFileSize()){
                         updateProgress(1,1);
+                        taskService.delDownloadTask(downloadTask);
                     }
                     return null;
                 }
@@ -754,6 +756,7 @@ public class Controller implements Initializable {
                     }
                     if (uploadTask.getAlreadyUpSize() >= uploadTask.getFileSize()) {
                         updateProgress(1,1);
+                        taskService.delUploadTask(uploadTask);
                     }
                     return null;
                 }
