@@ -1,7 +1,6 @@
 import controller.Controller;
 import javafx.application.Application;
 import javafx.event.EventHandler;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -20,8 +19,8 @@ public class FtpClient extends Application{
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        URL resourse = getClass().getResource("sample.fxml");
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("sample.fxml"));
+        URL resourse = getClass().getResource("FTP.fxml");
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("FTP.fxml"));
         Parent root = loader.load();
         Controller controller = loader.getController();
         primaryStage.setTitle("FTP Client");
